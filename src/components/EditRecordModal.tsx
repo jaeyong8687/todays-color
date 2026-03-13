@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import type { ColorInfo, ColorRecord, EmotionResult } from '../types';
 import ColorPicker from './ColorPicker';
 
