@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { HashRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider, useAuth } from './hooks/useKakaoAuth';
 import { ProfileProvider } from './hooks/useProfile';
@@ -12,23 +13,51 @@ import './styles/global.css';
 
 function AuthenticatedApp() {
   const { user, logout } = useAuth();
+  const [showMenu, setShowMenu] = useState(false);
 
   // Scope storage to this user's Kakao ID
   if (user) setAccountId(user.id);
+
+  const handleLogout = () => {
+    if (confirm('로그아웃 하시겠어요?')) {
+      logout();
+    }
+    setShowMenu(false);
+  };
 
   return (
     <ProfileProvider>
       <div className="app">
         <div className="app-header">
           <ProfileSelector />
-          <button className="logout-btn" onClick={logout} title="로그아웃">
-            <span className="logout-avatar">
-              {user?.profileImage
-                ? <img src={user.profileImage} alt="" className="logout-img" />
-                : '👤'}
-            </span>
-            <span className="logout-name">{user?.nickname}</span>
-          </button>
+          <div className="user-menu-wrapper">
+            <button className="user-btn" onClick={() => setShowMenu(!showMenu)}>
+              <span className="logout-avatar">
+                {user?.profileImage
+                  ? <img src={user.profileImage} alt="" className="logout-img" />
+                  : '👤'}
+              </span>
+              <span className="logout-name">{user?.nickname}</span>
+            </button>
+            {showMenu && (
+              <>
+                <div className="menu-backdrop" onClick={() => setShowMenu(false)} />
+                <div className="user-dropdown">
+                  <div className="dropdown-user">
+                    <span className="logout-avatar" style={{ width: 32, height: 32, fontSize: 18 }}>
+                      {user?.profileImage
+                        ? <img src={user.profileImage} alt="" className="logout-img" />
+                        : '👤'}
+                    </span>
+                    <span style={{ fontWeight: 600 }}>{user?.nickname}</span>
+                  </div>
+                  <button className="dropdown-item danger" onClick={handleLogout}>
+                    로그아웃
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
         </div>
         <Routes>
           <Route path="/" element={<HomePage />} />
