@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import type { ColorInfo, EmotionResult } from '../types';
 import { createColorFromHSV, getColorDisplayName } from '../utils/colors';
 import { getSuggestedEmotions } from '../utils/emotions';
@@ -9,121 +9,104 @@ interface Props {
   initialColor?: ColorInfo;
 }
 
+// Full spectrum: 36 hues × 12 tones + 12 grays = 444 colors
+const COLS = 18;
+const PALETTE = (() => {
+  const hues: number[] = [];
+  for (let i = 0; i < COLS; i++) hues.push(Math.round((i / COLS) * 360));
+
+  // [saturation, value/brightness] — 12 rows from bright pastels to dark vivids
+  const tones: [number, number][] = [
+    [30, 98],  // very light pastel
+    [45, 95],  // pastel
+    [60, 92],  // soft
+    [75, 88],  // medium-soft
+    [90, 85],  // vivid bright
+    [100, 75], // vivid
+    [100, 60], // vivid medium
+    [90, 48],  // dark vivid
+    [70, 38],  // dark muted
+    [50, 30],  // very dark muted
+    [30, 22],  // near-black tinted
+    [15, 15],  // almost black tinted
+  ];
+
+  const colors: ColorInfo[] = [];
+  for (const [s, v] of tones) {
+    for (const h of hues) {
+      colors.push(createColorFromHSV(h, s, v));
+    }
+  }
+
+  // Grayscale row
+  const graySteps = COLS;
+  for (let i = 0; i < graySteps; i++) {
+    const v = Math.round(100 - (i / (graySteps - 1)) * 100);
+    colors.push(createColorFromHSV(0, 0, Math.max(v, 2)));
+  }
+
+  return colors;
+})();
+
 export default function ColorPicker({ onSave, initialColor }: Props) {
   const { t } = useI18n();
-  const [hue, setHue] = useState(initialColor?.hue ?? 210);
-  const [saturation, setSaturation] = useState(80);
-  const [brightness, setBrightness] = useState(90);
+  const [selected, setSelected] = useState<ColorInfo | null>(null);
   const [selectedEmotion, setSelectedEmotion] = useState<EmotionResult | null>(null);
   const [memo, setMemo] = useState('');
-  const [step, setStep] = useState<'color' | 'mood'>('color');
 
-  const svPanelRef = useRef<HTMLDivElement>(null);
-  const hueBarRef = useRef<HTMLDivElement>(null);
-  const draggingSV = useRef(false);
-  const draggingHue = useRef(false);
-
-  const color = createColorFromHSV(hue, saturation, brightness);
-  const suggestions = getSuggestedEmotions(color);
+  const activeColor = selected;
+  const suggestions = useMemo(
+    () => activeColor ? getSuggestedEmotions(activeColor) : [],
+    [activeColor]
+  );
 
   const getEmotionDisplay = (e: EmotionResult) => {
     const emotionData = t.emotions[e.primary] || t.lightEmotions[e.primary];
     return emotionData ? emotionData.primary : e.primary;
   };
 
-  const updateSV = useCallback((clientX: number, clientY: number) => {
-    const el = svPanelRef.current;
-    if (!el) return;
-    const rect = el.getBoundingClientRect();
-    const x = Math.max(0, Math.min(clientX - rect.left, rect.width));
-    const y = Math.max(0, Math.min(clientY - rect.top, rect.height));
-    setSaturation(Math.round((x / rect.width) * 100));
-    setBrightness(Math.round((1 - y / rect.height) * 100));
-  }, []);
-
-  const updateHue = useCallback((clientX: number) => {
-    const el = hueBarRef.current;
-    if (!el) return;
-    const rect = el.getBoundingClientRect();
-    const x = Math.max(0, Math.min(clientX - rect.left, rect.width));
-    setHue(Math.round((x / rect.width) * 360));
-  }, []);
-
-  useEffect(() => {
-    const onMove = (e: PointerEvent) => {
-      if (draggingSV.current) { e.preventDefault(); updateSV(e.clientX, e.clientY); }
-      if (draggingHue.current) { e.preventDefault(); updateHue(e.clientX); }
-    };
-    const onUp = () => { draggingSV.current = false; draggingHue.current = false; };
-    window.addEventListener('pointermove', onMove);
-    window.addEventListener('pointerup', onUp);
-    return () => {
-      window.removeEventListener('pointermove', onMove);
-      window.removeEventListener('pointerup', onUp);
-    };
-  }, [updateSV, updateHue]);
-
-  const handleConfirmColor = () => {
+  const handleSelectColor = (color: ColorInfo) => {
+    setSelected(color);
     setSelectedEmotion(null);
     setMemo('');
-    setStep('mood');
   };
 
   const handleSave = () => {
-    if (!selectedEmotion) return;
-    onSave(color, selectedEmotion, memo);
+    if (!activeColor || !selectedEmotion) return;
+    onSave(activeColor, selectedEmotion, memo);
   };
-
-  const textColor = brightness > 60 && saturation < 50 ? '#222' : '#fff';
 
   return (
     <div className="picker">
-      {/* Color Picker */}
+      {/* Full Spectrum Grid */}
       <div
-        ref={svPanelRef}
-        className="picker-sv-panel"
-        style={{ backgroundColor: `hsl(${hue}, 100%, 50%)` }}
-        onPointerDown={(e) => {
-          draggingSV.current = true;
-          (e.target as HTMLElement).setPointerCapture(e.pointerId);
-          updateSV(e.clientX, e.clientY);
-        }}
+        className="palette-grid"
+        style={{ gridTemplateColumns: `repeat(${COLS}, 1fr)` }}
       >
-        <div className="picker-sv-white" />
-        <div className="picker-sv-black" />
-        <div
-          className="picker-sv-cursor"
-          style={{ left: `${saturation}%`, top: `${100 - brightness}%` }}
-        />
+        {PALETTE.map((color, i) => (
+          <button
+            key={i}
+            className={`palette-tile ${selected?.hex === color.hex ? 'selected' : ''}`}
+            style={{ backgroundColor: color.hsl }}
+            onClick={() => handleSelectColor(color)}
+          />
+        ))}
       </div>
 
-      <div
-        ref={hueBarRef}
-        className="picker-hue-bar"
-        onPointerDown={(e) => {
-          draggingHue.current = true;
-          (e.target as HTMLElement).setPointerCapture(e.pointerId);
-          updateHue(e.clientX);
-        }}
-      >
-        <div className="picker-hue-cursor" style={{ left: `${(hue / 360) * 100}%` }} />
-      </div>
+      {/* Selected Color Preview + Mood */}
+      {activeColor && (
+        <div className="picker-result">
+          <div
+            className="picker-preview"
+            style={{
+              backgroundColor: activeColor.hsl,
+              color: activeColor.lightness > 60 ? '#222' : '#fff',
+            }}
+          >
+            <span className="picker-preview-name">{getColorDisplayName(activeColor, t)}</span>
+            <span className="picker-preview-hex">{activeColor.hex.toUpperCase()}</span>
+          </div>
 
-      {/* Color Preview */}
-      <div className="picker-result">
-        <div className="picker-preview" style={{ backgroundColor: color.hsl, color: textColor }}>
-          <span className="picker-preview-name">{getColorDisplayName(color, t)}</span>
-          <span className="picker-preview-hex">{color.hex.toUpperCase()}</span>
-        </div>
-
-        {step === 'color' && (
-          <button className="btn-primary" onClick={handleConfirmColor}>
-            {t.confirmColor}
-          </button>
-        )}
-
-        {/* Mood Selection Step */}
-        {step === 'mood' && (
           <div className="mood-section">
             <p className="mood-question">{t.moodQuestion}</p>
 
@@ -155,13 +138,9 @@ export default function ColorPicker({ onSave, initialColor }: Props) {
             >
               {t.saveColor}
             </button>
-
-            <button className="btn-text" onClick={() => setStep('color')}>
-              {t.rePickColor}
-            </button>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }
