@@ -1,39 +1,19 @@
-// Shared AI API call helper
-const API_URL = 'https://models.inference.ai.azure.com/chat/completions';
-
-export function getApiKey(): string {
-  return localStorage.getItem('todays-color-ai-key') || '';
-}
-
-export function setApiKey(key: string): void {
-  localStorage.setItem('todays-color-ai-key', key);
-}
-
-export function hasApiKey(): boolean {
-  return !!getApiKey();
-}
+// AI calls go through our serverless proxy (/api/ai)
+// The API key is stored server-side as an environment variable — users never see it.
 
 export async function callAI(
   systemPrompt: string,
   userMessage: string,
   maxTokens = 500,
 ): Promise<string> {
-  const key = getApiKey();
-  if (!key) throw new Error('NO_KEY');
-
-  const res = await fetch(API_URL, {
+  const res = await fetch('/api/ai', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${key}`,
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      model: 'gpt-4o-mini',
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userMessage },
       ],
-      temperature: 0.7,
       max_tokens: maxTokens,
     }),
   });
@@ -45,4 +25,17 @@ export async function callAI(
 
   const result = await res.json();
   return result.choices?.[0]?.message?.content || '';
+}
+
+// Keep these for backward compat but they're no longer needed
+export function hasApiKey(): boolean {
+  return true; // AI is always available now
+}
+
+export function getApiKey(): string {
+  return '';
+}
+
+export function setApiKey(_key: string): void {
+  // no-op
 }
