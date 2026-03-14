@@ -1,5 +1,6 @@
 import type { ColorInfo, ColorRecord, EmotionResult } from '../types';
 import ColorPicker from './ColorPicker';
+import { useI18n } from '../i18n';
 
 interface Props {
   date: string;
@@ -9,12 +10,14 @@ interface Props {
   onClose: () => void;
 }
 
-function formatDate(dateStr: string) {
-  const [y, m, d] = dateStr.split('-');
-  return `${y}년 ${parseInt(m)}월 ${parseInt(d)}일`;
-}
-
 export default function EditRecordModal({ date, existingRecord, onSave, onDelete, onClose }: Props) {
+  const { t } = useI18n();
+
+  const formatDate = (dateStr: string) => {
+    const [y, m, d] = dateStr.split('-');
+    return t.dateFormat(y, m, d);
+  };
+
   const handleSave = (color: ColorInfo, emotion: EmotionResult, memo: string) => {
     onSave({ date, color, memo, emotion });
   };
@@ -23,10 +26,10 @@ export default function EditRecordModal({ date, existingRecord, onSave, onDelete
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content modal-full" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
-          <button className="btn-text" onClick={onClose}>✕ 닫기</button>
+          <button className="btn-text" onClick={onClose}>{t.close}</button>
           <span className="modal-title">{formatDate(date)}</span>
           {existingRecord && onDelete && (
-            <button className="btn-text-danger" onClick={onDelete}>삭제</button>
+            <button className="btn-text-danger" onClick={onDelete}>{t.deleteBtn}</button>
           )}
           {!existingRecord && <span />}
         </div>

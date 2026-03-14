@@ -1,4 +1,5 @@
 import type { ColorInfo } from '../types';
+import type { Translations } from '../i18n/types';
 
 const COLOR_FAMILY_NAMES: Record<string, [number, number]> = {
   '빨강': [0, 10],
@@ -80,4 +81,22 @@ export function createColorFromHSV(h: number, s: number, v: number): ColorInfo {
 }
 
 export const COLOR_FAMILIES = Object.keys(COLOR_FAMILY_NAMES);
+
+export function getColorDisplayName(color: ColorInfo, t: Translations): string {
+  const family = t.colorFamilies[color.emotionGroup] || color.emotionGroup;
+  let lDesc = '';
+  if (color.lightness <= 20) lDesc = t.brightnessLevels.veryDark;
+  else if (color.lightness <= 35) lDesc = t.brightnessLevels.dark;
+  else if (color.lightness <= 50) lDesc = t.brightnessLevels.normal;
+  else if (color.lightness <= 65) lDesc = t.brightnessLevels.bright;
+  else lDesc = t.brightnessLevels.veryBright;
+
+  let sDesc = '';
+  if (color.saturation <= 25) sDesc = t.saturationLevels.grayish;
+  else if (color.saturation <= 50) sDesc = t.saturationLevels.muted;
+  else if (color.saturation <= 75) sDesc = t.saturationLevels.normal;
+  else sDesc = t.saturationLevels.vivid;
+
+  return [lDesc, sDesc, family].filter(Boolean).join(' ');
+}
 

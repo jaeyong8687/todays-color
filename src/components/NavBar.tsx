@@ -1,19 +1,22 @@
 import { NavLink } from 'react-router-dom';
+import { useI18n } from '../i18n';
 
 export default function NavBar() {
+  const { t } = useI18n();
+
   return (
     <nav className="nav">
       <NavLink to="/" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`} end>
         <span className="nav-icon">🎨</span>
-        <span>오늘의 색</span>
+        <span>{t.navHome}</span>
       </NavLink>
       <NavLink to="/calendar" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
         <span className="nav-icon">📅</span>
-        <span>캘린더</span>
+        <span>{t.navCalendar}</span>
       </NavLink>
       <NavLink to="/analysis" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
         <span className="nav-icon">🧠</span>
-        <span>감정 분석</span>
+        <span>{t.navAnalysis}</span>
       </NavLink>
     </nav>
   );

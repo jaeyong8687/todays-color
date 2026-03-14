@@ -2,8 +2,10 @@ import { useState } from 'react';
 import { HashRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider, useAuth } from './hooks/useKakaoAuth';
 import { ProfileProvider } from './hooks/useProfile';
+import { I18nProvider, useI18n } from './i18n';
 import NavBar from './components/NavBar';
 import ProfileSelector from './components/ProfileSelector';
+import LangSwitch from './components/LangSwitch';
 import HomePage from './pages/HomePage';
 import CalendarPage from './pages/CalendarPage';
 import AnalysisPage from './pages/AnalysisPage';
@@ -13,13 +15,14 @@ import './styles/global.css';
 
 function AuthenticatedApp() {
   const { user, logout } = useAuth();
+  const { t } = useI18n();
   const [showMenu, setShowMenu] = useState(false);
 
   // Scope storage to this user's Kakao ID
   if (user) setAccountId(user.id);
 
   const handleLogout = () => {
-    if (confirm('로그아웃 하시겠어요?')) {
+    if (confirm(t.logoutConfirm)) {
       logout();
     }
     setShowMenu(false);
@@ -30,6 +33,7 @@ function AuthenticatedApp() {
       <div className="app">
         <div className="app-header">
           <ProfileSelector />
+          <LangSwitch />
           <div className="user-menu-wrapper">
             <button className="user-btn" onClick={() => setShowMenu(!showMenu)}>
               <span className="logout-avatar">
@@ -52,7 +56,7 @@ function AuthenticatedApp() {
                     <span style={{ fontWeight: 600 }}>{user?.nickname}</span>
                   </div>
                   <button className="dropdown-item danger" onClick={handleLogout}>
-                    로그아웃
+                    {t.logout}
                   </button>
                 </div>
               </>
@@ -81,9 +85,11 @@ function AppGate() {
 export default function App() {
   return (
     <HashRouter>
-      <AuthProvider>
-        <AppGate />
-      </AuthProvider>
+      <I18nProvider>
+        <AuthProvider>
+          <AppGate />
+        </AuthProvider>
+      </I18nProvider>
     </HashRouter>
   );
 }

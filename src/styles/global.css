@@ -68,6 +68,20 @@ button {
   padding: 8px 16px;
 }
 
+.lang-switch {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 4px 10px;
+  font-size: 16px;
+  cursor: pointer;
+  line-height: 1;
+  transition: background 0.2s;
+}
+.lang-switch:hover {
+  background: var(--bg-hover);
+}
+
 /* Login Page */
 .login-page {
   min-height: 100vh;
@@ -79,6 +93,7 @@ button {
 }
 
 .login-card {
+  position: relative;
   text-align: center;
   max-width: 340px;
   width: 100%;

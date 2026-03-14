@@ -3,10 +3,13 @@ import CalendarComponent from '../components/Calendar';
 import EditRecordModal from '../components/EditRecordModal';
 import { useColorHistory } from '../hooks/useColorHistory';
 import { isFutureDate } from '../utils/storage';
+import { getColorDisplayName } from '../utils/colors';
+import { useI18n } from '../i18n';
 import type { ColorRecord } from '../types';
 
 export default function CalendarPage() {
   const { records, save, getByDate, remove } = useColorHistory();
+  const { t } = useI18n();
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [editing, setEditing] = useState(false);
 
@@ -14,7 +17,17 @@ export default function CalendarPage() {
 
   const formatDate = (dateStr: string) => {
     const [y, m, d] = dateStr.split('-');
-    return `${y}년 ${parseInt(m)}월 ${parseInt(d)}일`;
+    return t.dateFormat(y, m, d);
+  };
+
+  const getEmotionDisplay = (key: string) => {
+    const emotionData = t.emotions[key] || t.lightEmotions[key];
+    return emotionData ? emotionData.primary : key;
+  };
+
+  const getSecondaryDisplay = (key: string) => {
+    const emotionData = t.emotions[key] || t.lightEmotions[key];
+    return emotionData ? emotionData.secondary : key;
   };
 
   const handleSelectDate = (date: string) => {
@@ -38,7 +51,7 @@ export default function CalendarPage() {
 
   return (
     <div className="page">
-      <h1 className="page-title">나의 색 캘린더 📅</h1>
+      <h1 className="page-title">{t.calendarTitle}</h1>
 
       <CalendarComponent
         records={records}
@@ -50,16 +63,16 @@ export default function CalendarPage() {
         <div className="record-detail">
           <div className="record-color-strip" style={{ background: selectedRecord.color.hsl }} />
           <div className="record-date">{formatDate(selectedDate)}</div>
-          <div className="color-name">{selectedRecord.color.name}</div>
+          <div className="color-name">{getColorDisplayName(selectedRecord.color, t)}</div>
           <div className="emotion-badge">
             <span>{selectedRecord.emotion.emoji}</span>
-            <span>{selectedRecord.emotion.primary} · {selectedRecord.emotion.secondary}</span>
+            <span>{getEmotionDisplay(selectedRecord.emotion.primary)} · {getSecondaryDisplay(selectedRecord.emotion.primary)}</span>
           </div>
           {selectedRecord.memo && (
             <div className="record-memo">📝 {selectedRecord.memo}</div>
           )}
           <button className="btn-secondary" onClick={() => setEditing(true)}>
-            ✏️ 수정하기
+            {t.editRecord}
           </button>
         </div>
       )}
@@ -68,18 +81,18 @@ export default function CalendarPage() {
         <div className="record-detail">
           <div className="record-date">{formatDate(selectedDate)}</div>
           <p style={{ color: 'var(--text-dim)', fontSize: 14, marginBottom: 12 }}>
-            이 날은 색을 기록하지 않았어요.
+            {t.noRecord}
           </p>
           <button className="btn-secondary" onClick={() => setEditing(true)}>
-            🎨 이 날의 색 추가하기
+            {t.addColor}
           </button>
         </div>
       )}
 
       {!selectedDate && (
         <div style={{ textAlign: 'center', marginTop: 24, color: 'var(--text-dim)', fontSize: 14 }}>
-          날짜를 눌러 기록을 확인하세요<br/>
-          <span style={{ fontSize: 12 }}>미래 날짜는 선택할 수 없어요</span>
+          {t.calendarHint}<br/>
+          <span style={{ fontSize: 12 }}>{t.noFuture}</span>
         </div>
       )}
 

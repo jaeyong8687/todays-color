@@ -2,6 +2,7 @@ import EmotionReport from '../components/EmotionReport';
 import AIAnalysis from '../components/AIAnalysis';
 import { useColorHistory } from '../hooks/useColorHistory';
 import { generateInsights } from '../utils/insights';
+import { useI18n } from '../i18n';
 import type { Insight } from '../utils/insights';
 
 function InsightCard({ insight }: { insight: Insight }) {
@@ -21,15 +22,16 @@ function InsightCard({ insight }: { insight: Insight }) {
 
 export default function AnalysisPage() {
   const { records } = useColorHistory();
-  const insights = generateInsights(records);
+  const { t } = useI18n();
+  const insights = generateInsights(records, t);
 
   return (
     <div className="page">
-      <h1 className="page-title">감정 분석 🧠</h1>
+      <h1 className="page-title">{t.analysisTitle}</h1>
 
       {insights.length > 0 && (
         <div className="stat-card">
-          <h3>💡 인사이트</h3>
+          <h3>{t.insights}</h3>
           {insights.map((insight, i) => (
             <InsightCard key={i} insight={insight} />
           ))}

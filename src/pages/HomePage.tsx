@@ -3,9 +3,12 @@ import type { ColorInfo, ColorRecord, EmotionResult } from '../types';
 import ColorPicker from '../components/ColorPicker';
 import { useColorHistory } from '../hooks/useColorHistory';
 import { getTodayString } from '../utils/storage';
+import { getColorDisplayName } from '../utils/colors';
+import { useI18n } from '../i18n';
 
 export default function HomePage() {
   const { save, getByDate } = useColorHistory();
+  const { t } = useI18n();
   const [saved, setSaved] = useState(false);
 
   const todayRecord = getByDate(getTodayString());
@@ -25,7 +28,7 @@ export default function HomePage() {
   return (
     <div className="page">
       <div style={{ marginBottom: 16, textAlign: 'center' }}>
-        <h1 className="page-title">오늘의 색 🎨</h1>
+        <h1 className="page-title">{t.homeTitle}</h1>
         {todayRecord ? (
           <div className="today-badge" style={{ display: 'inline-flex' }}>
             <span
@@ -37,11 +40,11 @@ export default function HomePage() {
                 display: 'inline-block',
               }}
             />
-            오늘의 색: {todayRecord.color.name} {todayRecord.emotion.emoji}
+            {t.todayColor}: {getColorDisplayName(todayRecord.color, t)} {todayRecord.emotion.emoji}
           </div>
         ) : (
           <p style={{ fontSize: 14, color: 'var(--text-dim)' }}>
-            오늘의 기분을 색으로 표현해보세요
+            {t.homePrompt}
           </p>
         )}
       </div>
@@ -53,7 +56,7 @@ export default function HomePage() {
 
       {saved && (
         <div className="save-toast">
-          ✨ 오늘의 색이 저장되었어요!
+          {t.savedToast}
         </div>
       )}
     </div>

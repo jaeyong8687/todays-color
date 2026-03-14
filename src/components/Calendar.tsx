@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import type { ColorRecord } from '../types';
 import { getTodayString, isFutureDate } from '../utils/storage';
+import { useI18n } from '../i18n';
 
 interface Props {
   records: ColorRecord[];
@@ -8,9 +9,8 @@ interface Props {
   selectedDate?: string | null;
 }
 
-const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
-
 export default function Calendar({ records, onSelectDate, selectedDate }: Props) {
+  const { t } = useI18n();
   const today = new Date();
   const [year, setYear] = useState(today.getFullYear());
   const [month, setMonth] = useState(today.getMonth() + 1);
@@ -56,16 +56,16 @@ export default function Calendar({ records, onSelectDate, selectedDate }: Props)
       <div className="calendar-header">
         <button className="calendar-nav" onClick={prevMonth}>◀</button>
         <div className="calendar-header-center">
-          <span className="calendar-month">{year}년 {month}월</span>
+          <span className="calendar-month">{t.yearMonth(year, month)}</span>
           {monthRecordCount > 0 && (
-            <span className="calendar-count">{monthRecordCount}일 기록</span>
+            <span className="calendar-count">{t.dayRecords(monthRecordCount)}</span>
           )}
         </div>
         <button className="calendar-nav" onClick={nextMonth}>▶</button>
       </div>
 
       <div className="calendar-weekdays-large">
-        {WEEKDAYS.map((d) => (
+        {t.weekdays.map((d) => (
           <div key={d} className="calendar-weekday">{d}</div>
         ))}
       </div>

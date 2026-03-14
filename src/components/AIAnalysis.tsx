@@ -1,23 +1,14 @@
 import { useState } from 'react';
 import type { ColorRecord } from '../types';
 import { formatRecordsForAI } from '../utils/insights';
+import { useI18n } from '../i18n';
 
 interface Props {
   records: ColorRecord[];
 }
 
-const AI_PROMPT = `당신은 색채심리학과 감정 분석 전문가입니다. 사용자가 매일 선택한 색과 감정 기록을 분석해주세요.
-
-분석해야 할 것:
-1. 전반적인 감정 흐름과 패턴
-2. 색상 선택에서 드러나는 심리 상태
-3. 시간에 따른 감정 변화 트렌드
-4. 주의가 필요한 패턴 (연속된 부정적 감정 등)
-5. 긍정적인 점과 격려의 말
-
-따뜻하고 공감적인 톤으로, 한국어로 3-5문단으로 답변해주세요. 이모지를 적절히 사용하세요.`;
-
 export default function AIAnalysis({ records }: Props) {
+  const { t } = useI18n();
   const [report, setReport] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -48,7 +39,7 @@ export default function AIAnalysis({ records }: Props) {
         body: JSON.stringify({
           model: 'gpt-4o-mini',
           messages: [
-            { role: 'system', content: AI_PROMPT },
+            { role: 'system', content: t.aiSystemPrompt },
             { role: 'user', content: data },
           ],
           temperature: 0.7,
@@ -58,13 +49,13 @@ export default function AIAnalysis({ records }: Props) {
 
       if (!res.ok) {
         const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.error?.message || `API 오류 (${res.status})`);
+        throw new Error(errData.error?.message || t.aiApiError(res.status));
       }
 
       const result = await res.json();
-      setReport(result.choices?.[0]?.message?.content || '분석 결과를 받지 못했습니다.');
+      setReport(result.choices?.[0]?.message?.content || t.aiNoResult);
     } catch (err) {
-      setError(err instanceof Error ? err.message : '알 수 없는 오류');
+      setError(err instanceof Error ? err.message : t.aiUnknownError);
     } finally {
       setLoading(false);
     }
@@ -78,32 +69,32 @@ export default function AIAnalysis({ records }: Props) {
 
   return (
     <div className="stat-card">
-      <h3>🤖 AI 심층 분석</h3>
+      <h3>{t.aiTitle}</h3>
 
       {!canAnalyze && (
         <div className="ai-locked">
           <span className="ai-locked-icon">🔒</span>
-          <p>{7 - records.length}일 더 기록하면 AI 분석을 받을 수 있어요!</p>
+          <p>{t.aiLocked(7 - records.length)}</p>
           <div className="ai-progress-bar">
             <div
               className="ai-progress-fill"
               style={{ width: `${(records.length / 7) * 100}%` }}
             />
           </div>
-          <span className="ai-progress-text">{records.length}/7일</span>
+          <span className="ai-progress-text">{t.aiProgress(records.length)}</span>
         </div>
       )}
 
       {canAnalyze && !report && !loading && !showKeyInput && (
         <div>
           <p style={{ fontSize: 14, color: 'var(--text-dim)', marginBottom: 12 }}>
-            {records.length}일의 기록을 AI가 분석하여 심층적인 감정 리포트를 만들어줍니다.
+            {t.aiDescription(records.length)}
           </p>
           <button className="btn-primary" onClick={runAnalysis}>
-            ✨ AI 분석 시작하기
+            {t.aiStart}
           </button>
           <p style={{ fontSize: 11, color: 'var(--text-dim)', marginTop: 8, textAlign: 'center' }}>
-            GitHub 토큰이 필요합니다 (무료)
+            {t.aiTokenNeeded}
           </p>
         </div>
       )}
@@ -114,25 +105,30 @@ export default function AIAnalysis({ records }: Props) {
             GitHub Personal Access Token이 필요해요 (무료):
           </p>
           <ol style={{ fontSize: 13, color: 'var(--text-dim)', marginBottom: 12, paddingLeft: 20 }}>
-            <li><a href="https://github.com/settings/tokens" target="_blank" rel="noopener" style={{ color: 'var(--accent)' }}>github.com/settings/tokens</a> 방문</li>
-            <li>"Generate new token (classic)" 클릭</li>
-            <li>이름 입력, 권한은 아무것도 체크 안 해도 OK</li>
-            <li>생성된 토큰 복사</li>
+            {t.aiTokenInstructions.map((instruction, i) => (
+              <li key={i}>
+                {i === 0 ? (
+                  <a href="https://github.com/settings/tokens" target="_blank" rel="noopener" style={{ color: 'var(--accent)' }}>
+                    {instruction}
+                  </a>
+                ) : instruction}
+              </li>
+            ))}
           </ol>
           <input
             className="profile-name-input"
             type="password"
-            placeholder="ghp_xxxxxxxxxxxx"
+            placeholder={t.aiTokenPlaceholder}
             value={apiKey}
             onChange={(e) => setApiKey(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && saveKey()}
           />
           <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
             <button className="btn-primary" onClick={saveKey} style={{ flex: 1 }}>
-              저장 & 분석 시작
+              {t.aiSaveAndStart}
             </button>
             <button className="btn-secondary" onClick={() => setShowKeyInput(false)} style={{ flex: 0, padding: '12px 16px' }}>
-              취소
+              {t.aiCancel}
             </button>
           </div>
         </div>
@@ -141,7 +137,7 @@ export default function AIAnalysis({ records }: Props) {
       {loading && (
         <div className="ai-loading">
           <div className="ai-loading-spinner" />
-          <p>AI가 감정 패턴을 분석하고 있어요...</p>
+          <p>{t.aiLoading}</p>
         </div>
       )}
 
@@ -149,7 +145,7 @@ export default function AIAnalysis({ records }: Props) {
         <div className="ai-error">
           <p>❌ {error}</p>
           <button className="btn-secondary" onClick={() => { setError(null); setShowKeyInput(true); }}>
-            토큰 다시 입력
+            {t.aiRetryToken}
           </button>
         </div>
       )}
@@ -164,7 +160,7 @@ export default function AIAnalysis({ records }: Props) {
             onClick={() => setReport(null)}
             style={{ marginTop: 12 }}
           >
-            🔄 다시 분석하기
+            {t.aiRetry}
           </button>
         </div>
       )}

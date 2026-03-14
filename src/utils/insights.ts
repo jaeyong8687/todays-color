@@ -1,4 +1,5 @@
 import type { ColorRecord } from '../types';
+import type { Translations } from '../i18n/types';
 import { EMOTION_COLORS } from './emotions';
 
 export interface Insight {
@@ -19,9 +20,12 @@ function recentRecords(records: ColorRecord[], days: number): ColorRecord[] {
   return records.filter((r) => r.date >= cutoffStr);
 }
 
-const WEEKDAY_NAMES = ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'];
+function getEmotionDisplay(key: string, t: Translations): string {
+  const emotionData = t.emotions[key] || t.lightEmotions[key];
+  return emotionData ? emotionData.primary : key;
+}
 
-export function generateInsights(records: ColorRecord[]): Insight[] {
+export function generateInsights(records: ColorRecord[], t: Translations): Insight[] {
   if (records.length < 3) return [];
 
   const insights: Insight[] = [];
@@ -37,10 +41,16 @@ export function generateInsights(records: ColorRecord[]): Insight[] {
   if (sorted.length > 0) {
     const [top, count] = sorted[0];
     const pct = Math.round((count / records.length) * 100);
+    const topDisplay = getEmotionDisplay(top, t);
+    const positiveEmotions = ['열정', '행복', '설렘'];
+    const calmEmotions = ['평온', '안정'];
+    const subBody = positiveEmotions.includes(top) ? t.insightMessages.dominantPositive
+      : calmEmotions.includes(top) ? t.insightMessages.dominantCalm
+      : t.insightMessages.dominantDefault;
     insights.push({
       emoji: '🎯',
-      title: `당신의 주된 감정은 "${top}"`,
-      body: `전체 기록의 ${pct}%를 차지합니다. ${top === '열정' || top === '행복' || top === '설렘' ? '에너지가 넘치는 시기네요!' : top === '평온' || top === '안정' ? '안정적인 시간을 보내고 있어요.' : '내면의 감정을 잘 들어보세요.'}`,
+      title: `${topDisplay}`,
+      body: `${t.insightMessages.dominantEmotion(topDisplay, pct)} ${subBody}`,
       type: top === '우울' || top === '피곤함' ? 'concern' : 'positive',
     });
   }
@@ -57,15 +67,15 @@ export function generateInsights(records: ColorRecord[]): Insight[] {
     if (recentBright > recentDark && recentBright >= 3) {
       insights.push({
         emoji: '☀️',
-        title: '이번 주 밝은 감정이 많아요',
-        body: `최근 7일 중 ${recentBright}일이 밝은 감정이에요. 좋은 흐름을 유지하고 있어요!`,
+        title: '☀️',
+        body: t.insightMessages.brightWeek(recentBright),
         type: 'positive',
       });
     } else if (recentDark >= 3) {
       insights.push({
         emoji: '🌧️',
-        title: '최근 지친 감정이 이어지고 있어요',
-        body: `최근 7일 중 ${recentDark}일이 우울하거나 피곤한 기분이었어요. 충분히 쉬고 있나요?`,
+        title: '🌧️',
+        body: t.insightMessages.darkWeek(recentDark),
         type: 'concern',
       });
     }
@@ -95,8 +105,8 @@ export function generateInsights(records: ColorRecord[]): Insight[] {
     if (worstDay >= 0 && worstRatio >= 0.5) {
       insights.push({
         emoji: '📅',
-        title: `${WEEKDAY_NAMES[worstDay]}에 우울한 경향이 있어요`,
-        body: `${WEEKDAY_NAMES[worstDay]} 기록의 ${Math.round(worstRatio * 100)}%가 어두운 감정이에요. 그 날에 특별히 쉬는 시간을 가져보세요.`,
+        title: `📅 ${t.weekdayNames[worstDay]}`,
+        body: t.insightMessages.weekdayPattern(t.weekdayNames[worstDay], Math.round(worstRatio * 100)),
         type: 'concern',
       });
     }
@@ -108,15 +118,15 @@ export function generateInsights(records: ColorRecord[]): Insight[] {
     if (avgLightness > 60) {
       insights.push({
         emoji: '🌈',
-        title: '밝은 색을 많이 선택하고 있어요',
-        body: `최근 평균 밝기가 ${Math.round(avgLightness)}%로 높아요. 긍정적이고 활기찬 시기를 보내고 있는 것 같아요.`,
+        title: '🌈',
+        body: t.insightMessages.brightColors(Math.round(avgLightness)),
         type: 'positive',
       });
     } else if (avgLightness < 35) {
       insights.push({
         emoji: '🌑',
-        title: '어두운 색이 많은 시기예요',
-        body: `최근 평균 밝기가 ${Math.round(avgLightness)}%로 낮아요. 마음이 무겁다면 가까운 사람과 이야기를 나눠보세요.`,
+        title: '🌑',
+        body: t.insightMessages.darkColors(Math.round(avgLightness)),
         type: 'concern',
       });
     }
@@ -128,10 +138,11 @@ export function generateInsights(records: ColorRecord[]): Insight[] {
     const lastFiveEmotions = lastFive.map((r) => r.emotion.primary);
     const allSame = lastFiveEmotions.every((e) => e === lastFiveEmotions[0]);
     if (allSame) {
+      const emotionDisplay = getEmotionDisplay(lastFiveEmotions[0], t);
       insights.push({
         emoji: '🔁',
-        title: `"${lastFiveEmotions[0]}" 감정이 계속되고 있어요`,
-        body: `최근 5일 연속 같은 감정이에요. 다른 활동이나 환경 변화를 시도해보는 건 어떨까요?`,
+        title: `🔁 ${emotionDisplay}`,
+        body: t.insightMessages.emotionStreak(emotionDisplay),
         type: 'neutral',
       });
     }
@@ -143,8 +154,8 @@ export function generateInsights(records: ColorRecord[]): Insight[] {
     if (lastWeek.length >= 6) {
       insights.push({
         emoji: '🏅',
-        title: '꾸준히 기록하고 있어요!',
-        body: `지난 7일 중 ${lastWeek.length}일을 기록했어요. 자신의 감정을 돌아보는 좋은 습관이에요!`,
+        title: '🏅',
+        body: t.insightMessages.consistency(lastWeek.length),
         type: 'positive',
       });
     }

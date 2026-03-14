@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { useProfile } from '../hooks/useProfile';
+import { useI18n } from '../i18n';
 
 const EMOJI_OPTIONS = ['🙂', '👧', '👦', '👶', '🐱', '🐶', '🌸', '⭐', '🎀', '💜'];
 
 export default function ProfileSelector() {
   const { profiles, activeProfile, switchProfile, addProfile, removeProfile } = useProfile();
+  const { t } = useI18n();
   const [showAdd, setShowAdd] = useState(false);
   const [newName, setNewName] = useState('');
   const [newEmoji, setNewEmoji] = useState('👧');
@@ -31,7 +33,7 @@ export default function ProfileSelector() {
           </button>
         ))}
         <button className="profile-chip add" onClick={() => setShowAdd(!showAdd)}>
-          + 추가
+          {t.addProfile}
         </button>
       </div>
 
@@ -51,20 +53,20 @@ export default function ProfileSelector() {
           <div className="profile-add-row">
             <input
               className="profile-name-input"
-              placeholder="이름 (예: 딸)"
+              placeholder={t.profileNamePlaceholder}
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
               maxLength={10}
             />
-            <button className="btn-small" onClick={handleAdd}>만들기</button>
+            <button className="btn-small" onClick={handleAdd}>{t.createBtn}</button>
           </div>
           {profiles.length > 1 && (
             <button
               className="btn-text-danger"
               onClick={() => { removeProfile(activeProfile.id); setShowAdd(false); }}
             >
-              "{activeProfile.name}" 프로필 삭제
+              {t.deleteProfile(activeProfile.name)}
             </button>
           )}
         </div>

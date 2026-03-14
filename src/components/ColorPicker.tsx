@@ -1,7 +1,8 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import type { ColorInfo, EmotionResult } from '../types';
-import { createColorFromHSV } from '../utils/colors';
+import { createColorFromHSV, getColorDisplayName } from '../utils/colors';
 import { getSuggestedEmotions } from '../utils/emotions';
+import { useI18n } from '../i18n';
 
 interface Props {
   onSave: (color: ColorInfo, emotion: EmotionResult, memo: string) => void;
@@ -9,6 +10,7 @@ interface Props {
 }
 
 export default function ColorPicker({ onSave, initialColor }: Props) {
+  const { t } = useI18n();
   const [hue, setHue] = useState(initialColor?.hue ?? 210);
   const [saturation, setSaturation] = useState(80);
   const [brightness, setBrightness] = useState(90);
@@ -23,6 +25,11 @@ export default function ColorPicker({ onSave, initialColor }: Props) {
 
   const color = createColorFromHSV(hue, saturation, brightness);
   const suggestions = getSuggestedEmotions(color);
+
+  const getEmotionDisplay = (e: EmotionResult) => {
+    const emotionData = t.emotions[e.primary] || t.lightEmotions[e.primary];
+    return emotionData ? emotionData.primary : e.primary;
+  };
 
   const updateSV = useCallback((clientX: number, clientY: number) => {
     const el = svPanelRef.current;
@@ -105,20 +112,20 @@ export default function ColorPicker({ onSave, initialColor }: Props) {
       {/* Color Preview */}
       <div className="picker-result">
         <div className="picker-preview" style={{ backgroundColor: color.hsl, color: textColor }}>
-          <span className="picker-preview-name">{color.name}</span>
+          <span className="picker-preview-name">{getColorDisplayName(color, t)}</span>
           <span className="picker-preview-hex">{color.hex.toUpperCase()}</span>
         </div>
 
         {step === 'color' && (
           <button className="btn-primary" onClick={handleConfirmColor}>
-            이 색으로 정하기
+            {t.confirmColor}
           </button>
         )}
 
         {/* Mood Selection Step */}
         {step === 'mood' && (
           <div className="mood-section">
-            <p className="mood-question">오늘 기분이 어때요?</p>
+            <p className="mood-question">{t.moodQuestion}</p>
 
             <div className="mood-chips">
               {suggestions.map((e) => (
@@ -128,14 +135,14 @@ export default function ColorPicker({ onSave, initialColor }: Props) {
                   onClick={() => setSelectedEmotion(e)}
                 >
                   <span className="mood-chip-emoji">{e.emoji}</span>
-                  <span>{e.primary}</span>
+                  <span>{getEmotionDisplay(e)}</span>
                 </button>
               ))}
             </div>
 
             <textarea
               className="memo-input"
-              placeholder="더 이야기하고 싶다면 자유롭게 ✏️"
+              placeholder={t.memoPlaceholder}
               rows={2}
               value={memo}
               onChange={(e) => setMemo(e.target.value)}
@@ -146,11 +153,11 @@ export default function ColorPicker({ onSave, initialColor }: Props) {
               onClick={handleSave}
               disabled={!selectedEmotion}
             >
-              오늘의 색 저장하기
+              {t.saveColor}
             </button>
 
             <button className="btn-text" onClick={() => setStep('color')}>
-              ← 색 다시 고르기
+              {t.rePickColor}
             </button>
           </div>
         )}

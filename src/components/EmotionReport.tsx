@@ -10,6 +10,7 @@ import {
 } from 'chart.js';
 import type { ColorRecord } from '../types';
 import { getEmotionSummary, EMOTION_COLORS } from '../utils/emotions';
+import { useI18n } from '../i18n';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
@@ -18,6 +19,13 @@ interface Props {
 }
 
 export default function EmotionReport({ records }: Props) {
+  const { t } = useI18n();
+
+  const getEmotionDisplay = (key: string) => {
+    const emotionData = t.emotions[key] || t.lightEmotions[key];
+    return emotionData ? emotionData.primary : key;
+  };
+
   const summary = useMemo(() => {
     return getEmotionSummary(records.map((r) => r.emotion));
   }, [records]);
@@ -29,14 +37,14 @@ export default function EmotionReport({ records }: Props) {
   const maxCount = sorted.length > 0 ? sorted[0][1] : 1;
 
   const chartData = useMemo(() => ({
-    labels: sorted.map(([name]) => name),
+    labels: sorted.map(([name]) => getEmotionDisplay(name)),
     datasets: [{
-      label: '기록 수',
+      label: t.recordCount,
       data: sorted.map(([, count]) => count),
       backgroundColor: sorted.map(([name]) => EMOTION_COLORS[name] || '#888'),
       borderRadius: 6,
     }],
-  }), [sorted]);
+  }), [sorted, t]);
 
   const chartOptions = {
     responsive: true,
@@ -60,7 +68,9 @@ export default function EmotionReport({ records }: Props) {
     return (
       <div className="empty-state">
         <div className="empty-icon">📊</div>
-        <p>아직 기록이 없어요.<br />오늘의 색을 선택하면<br />감정 분석이 시작됩니다!</p>
+        <p>{t.emptyState.split('\n').map((line, i, arr) => (
+          <span key={i}>{line}{i < arr.length - 1 && <br />}</span>
+        ))}</p>
       </div>
     );
   }
@@ -70,20 +80,20 @@ export default function EmotionReport({ records }: Props) {
   return (
     <div>
       <div className="stat-card">
-        <h3>🏆 가장 많이 느낀 감정</h3>
+        <h3>{t.topEmotion}</h3>
         <div style={{ fontSize: 32, fontWeight: 700, marginBottom: 4 }}>
-          {dominantEmotion[0]}
+          {getEmotionDisplay(dominantEmotion[0])}
         </div>
         <div style={{ fontSize: 14, color: 'var(--text-dim)' }}>
-          총 {records.length}개의 기록 중 {dominantEmotion[1]}번
+          {t.totalOfRecords(records.length, dominantEmotion[1])}
         </div>
       </div>
 
       <div className="stat-card">
-        <h3>📊 감정 분포</h3>
+        <h3>{t.emotionDist}</h3>
         {sorted.map(([name, count]) => (
           <div key={name} className="emotion-bar-row">
-            <span className="emotion-bar-label">{name}</span>
+            <span className="emotion-bar-label">{getEmotionDisplay(name)}</span>
             <div className="emotion-bar-track">
               <div
                 className="emotion-bar-fill"
@@ -99,7 +109,7 @@ export default function EmotionReport({ records }: Props) {
       </div>
 
       <div className="stat-card">
-        <h3>📈 감정 차트</h3>
+        <h3>{t.emotionChart}</h3>
         <div className="chart-container">
           <Bar data={chartData} options={chartOptions} />
         </div>

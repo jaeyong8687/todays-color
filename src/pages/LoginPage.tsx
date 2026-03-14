@@ -1,7 +1,10 @@
 import { useAuth } from '../hooks/useKakaoAuth';
+import { useI18n } from '../i18n';
+import LangSwitch from '../components/LangSwitch';
 
 export default function LoginPage() {
   const { login } = useAuth();
+  const { t } = useI18n();
 
   const handleClick = () => {
     login();
@@ -10,10 +13,15 @@ export default function LoginPage() {
   return (
     <div className="login-page">
       <div className="login-card">
+        <div style={{ position: 'absolute', top: 16, right: 16 }}>
+          <LangSwitch />
+        </div>
         <div className="login-icon">🎨</div>
-        <h1 className="login-title">오늘의 색</h1>
+        <h1 className="login-title">{t.appName}</h1>
         <p className="login-subtitle">
-          매일 한 가지 색으로<br />나의 하루를 기록해보세요
+          {t.loginSubtitle.split('\n').map((line, i, arr) => (
+            <span key={i}>{line}{i < arr.length - 1 && <br />}</span>
+          ))}
         </p>
 
         <button
@@ -21,11 +29,11 @@ export default function LoginPage() {
           onClick={handleClick}
           type="button"
         >
-          💬 카카오 로그인
+          {t.loginButton}
         </button>
 
         <p className="login-footer">
-          간편하게 카카오 계정으로 시작하세요
+          {t.loginFooter}
         </p>
       </div>
     </div>
