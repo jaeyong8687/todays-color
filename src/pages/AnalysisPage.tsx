@@ -1,5 +1,6 @@
 import EmotionReport from '../components/EmotionReport';
 import AIAnalysis from '../components/AIAnalysis';
+import WeeklyAIReport from '../components/WeeklyAIReport';
 import { useColorHistory } from '../hooks/useColorHistory';
 import { generateInsights } from '../utils/insights';
 import { useI18n } from '../i18n';
@@ -39,6 +40,7 @@ export default function AnalysisPage() {
       )}
 
       <EmotionReport records={records} />
+      <WeeklyAIReport records={records} />
       <AIAnalysis records={records} />
     </div>
   );

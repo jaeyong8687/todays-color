@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { ColorRecord } from '../types';
 import { formatRecordsForAI } from '../utils/insights';
+import { callAI, getApiKey, setApiKey as saveApiKey, hasApiKey } from '../utils/ai';
 import { useI18n } from '../i18n';
 
 interface Props {
@@ -12,13 +13,11 @@ export default function AIAnalysis({ records }: Props) {
   const [report, setReport] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [apiKey, setApiKey] = useState(() => localStorage.getItem('todays-color-ai-key') || '');
+  const [apiKey, setApiKeyLocal] = useState(getApiKey);
   const [showKeyInput, setShowKeyInput] = useState(false);
 
-  const canAnalyze = records.length >= 7;
-
   const runAnalysis = async () => {
-    if (!apiKey.trim()) {
+    if (!hasApiKey()) {
       setShowKeyInput(true);
       return;
     }
@@ -30,62 +29,33 @@ export default function AIAnalysis({ records }: Props) {
     const data = formatRecordsForAI(records);
 
     try {
-      const res = await fetch('https://models.inference.ai.azure.com/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey.trim()}`,
-        },
-        body: JSON.stringify({
-          model: 'gpt-4o-mini',
-          messages: [
-            { role: 'system', content: t.aiSystemPrompt },
-            { role: 'user', content: data },
-          ],
-          temperature: 0.7,
-          max_tokens: 1000,
-        }),
-      });
-
-      if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.error?.message || t.aiApiError(res.status));
-      }
-
-      const result = await res.json();
-      setReport(result.choices?.[0]?.message?.content || t.aiNoResult);
+      const result = await callAI(t.aiSystemPrompt, data, 1000);
+      setReport(result || t.aiNoResult);
     } catch (err) {
-      setError(err instanceof Error ? err.message : t.aiUnknownError);
+      const msg = err instanceof Error ? err.message : t.aiUnknownError;
+      if (msg === 'NO_KEY') {
+        setShowKeyInput(true);
+      } else {
+        setError(msg);
+      }
     } finally {
       setLoading(false);
     }
   };
 
   const saveKey = () => {
-    localStorage.setItem('todays-color-ai-key', apiKey.trim());
+    saveApiKey(apiKey.trim());
     setShowKeyInput(false);
     runAnalysis();
   };
+
+  if (records.length === 0) return null;
 
   return (
     <div className="stat-card">
       <h3>{t.aiTitle}</h3>
 
-      {!canAnalyze && (
-        <div className="ai-locked">
-          <span className="ai-locked-icon">🔒</span>
-          <p>{t.aiLocked(7 - records.length)}</p>
-          <div className="ai-progress-bar">
-            <div
-              className="ai-progress-fill"
-              style={{ width: `${(records.length / 7) * 100}%` }}
-            />
-          </div>
-          <span className="ai-progress-text">{t.aiProgress(records.length)}</span>
-        </div>
-      )}
-
-      {canAnalyze && !report && !loading && !showKeyInput && (
+      {!report && !loading && !showKeyInput && (
         <div>
           <p style={{ fontSize: 14, color: 'var(--text-dim)', marginBottom: 12 }}>
             {t.aiDescription(records.length)}
@@ -93,16 +63,18 @@ export default function AIAnalysis({ records }: Props) {
           <button className="btn-primary" onClick={runAnalysis}>
             {t.aiStart}
           </button>
-          <p style={{ fontSize: 11, color: 'var(--text-dim)', marginTop: 8, textAlign: 'center' }}>
-            {t.aiTokenNeeded}
-          </p>
+          {!hasApiKey() && (
+            <p style={{ fontSize: 11, color: 'var(--text-dim)', marginTop: 8, textAlign: 'center' }}>
+              {t.aiTokenNeeded}
+            </p>
+          )}
         </div>
       )}
 
       {showKeyInput && (
         <div className="ai-key-setup">
           <p style={{ fontSize: 14, marginBottom: 8 }}>
-            GitHub Personal Access Token이 필요해요 (무료):
+            {t.aiTokenNeeded}:
           </p>
           <ol style={{ fontSize: 13, color: 'var(--text-dim)', marginBottom: 12, paddingLeft: 20 }}>
             {t.aiTokenInstructions.map((instruction, i) => (
@@ -120,7 +92,7 @@ export default function AIAnalysis({ records }: Props) {
             type="password"
             placeholder={t.aiTokenPlaceholder}
             value={apiKey}
-            onChange={(e) => setApiKey(e.target.value)}
+            onChange={(e) => setApiKeyLocal(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && saveKey()}
           />
           <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>

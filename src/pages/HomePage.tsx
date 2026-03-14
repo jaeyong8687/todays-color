@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import type { ColorInfo, ColorRecord, EmotionResult } from '../types';
 import ColorPicker from '../components/ColorPicker';
+import DailyAIComment from '../components/DailyAIComment';
 import { useColorHistory } from '../hooks/useColorHistory';
 import { getTodayString } from '../utils/storage';
 import { getColorDisplayName } from '../utils/colors';
 import { useI18n } from '../i18n';
 
 export default function HomePage() {
-  const { save, getByDate } = useColorHistory();
+  const { records, save, getByDate } = useColorHistory();
   const { t } = useI18n();
   const [saved, setSaved] = useState(false);
 
@@ -30,18 +31,21 @@ export default function HomePage() {
       <div style={{ marginBottom: 16, textAlign: 'center' }}>
         <h1 className="page-title">{t.homeTitle}</h1>
         {todayRecord ? (
-          <div className="today-badge" style={{ display: 'inline-flex' }}>
-            <span
-              style={{
-                width: 16,
-                height: 16,
-                borderRadius: '50%',
-                background: todayRecord.color.hsl,
-                display: 'inline-block',
-              }}
-            />
-            {t.todayColor}: {getColorDisplayName(todayRecord.color, t)} {todayRecord.emotion.emoji}
-          </div>
+          <>
+            <div className="today-badge" style={{ display: 'inline-flex' }}>
+              <span
+                style={{
+                  width: 16,
+                  height: 16,
+                  borderRadius: '50%',
+                  background: todayRecord.color.hsl,
+                  display: 'inline-block',
+                }}
+              />
+              {t.todayColor}: {getColorDisplayName(todayRecord.color, t)} {todayRecord.emotion.emoji}
+            </div>
+            <DailyAIComment record={todayRecord} recentRecords={records} />
+          </>
         ) : (
           <p style={{ fontSize: 14, color: 'var(--text-dim)' }}>
             {t.homePrompt}
