@@ -1,8 +1,8 @@
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
 
 const KAKAO_JS_KEY = '1ae868903d36799bf7977fefcd4aeca9';
-const KAKAO_REST_KEY = '287c36ef9b7ed66252194b6ec735c6f0';
-const KAKAO_CLIENT_SECRET = '0IOIWQZoP3tMlN1WtAdICjiYDJ234Ebr';
+const KAKAO_REST_KEY = '2692bb6bfd60d791f357cbe2a321cab2';
+const KAKAO_CLIENT_SECRET = 'vUkJafcb45sQ1ebH0s48Eexrsl7D1kbv';
 const AUTH_STORAGE_KEY = 'todays-color-kakao-user';
 const REDIRECT_URI = window.location.origin;
 
