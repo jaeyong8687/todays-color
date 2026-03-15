@@ -129,6 +129,11 @@ export const ko: Translations = {
     consistency: (count) => `지난 7일 중 ${count}일을 기록했어요. 자신의 감정을 돌아보는 좋은 습관이에요!`,
   },
 
+  formatFullDate: (date: Date) => {
+    const weekdays = ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'];
+    return `${date.getMonth() + 1}월 ${date.getDate()}일 ${weekdays[date.getDay()]}`;
+  },
+
   defaultProfileName: '나',
   defaultUserName: '사용자',
 };

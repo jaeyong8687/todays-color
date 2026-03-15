@@ -1,10 +1,9 @@
 import { useAuth } from '../hooks/useKakaoAuth';
 import { useI18n } from '../i18n';
-import LangSwitch from '../components/LangSwitch';
 
 export default function LoginPage() {
   const { login } = useAuth();
-  const { t } = useI18n();
+  const { t, lang, setLang } = useI18n();
 
   const handleClick = () => {
     login();
@@ -12,12 +11,21 @@ export default function LoginPage() {
 
   return (
     <div className="login-page">
+      <div className="login-bg-orbs">
+        <div className="login-orb orb-1" />
+        <div className="login-orb orb-2" />
+        <div className="login-orb orb-3" />
+      </div>
+      <button
+        className="login-lang-btn"
+        onClick={() => setLang(lang === 'ko' ? 'en' : 'ko')}
+        aria-label="Switch language"
+      >
+        {lang === 'ko' ? '🇰🇷' : '🇺🇸'}
+      </button>
       <div className="login-card">
-        <div style={{ position: 'absolute', top: 16, right: 16 }}>
-          <LangSwitch />
-        </div>
         <div className="login-icon">🎨</div>
-        <h1 className="login-title">{t.appName}</h1>
+        <h1 className="login-title app-logo" style={{ fontSize: 36, WebkitTextFillColor: 'transparent' }}>{t.appName}</h1>
         <p className="login-subtitle">
           {t.loginSubtitle.split('\n').map((line, i, arr) => (
             <span key={i}>{line}{i < arr.length - 1 && <br />}</span>

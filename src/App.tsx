@@ -1,11 +1,10 @@
 import { useState } from 'react';
-import { HashRouter, Routes, Route } from 'react-router-dom';
+import { HashRouter, Routes, Route, useNavigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './hooks/useKakaoAuth';
 import { ProfileProvider } from './hooks/useProfile';
 import { I18nProvider, useI18n } from './i18n';
 import NavBar from './components/NavBar';
 import ProfileSelector from './components/ProfileSelector';
-import LangSwitch from './components/LangSwitch';
 import HomePage from './pages/HomePage';
 import CalendarPage from './pages/CalendarPage';
 import AnalysisPage from './pages/AnalysisPage';
@@ -15,8 +14,9 @@ import './styles/global.css';
 
 function AuthenticatedApp() {
   const { user, logout } = useAuth();
-  const { t } = useI18n();
+  const { t, lang, setLang } = useI18n();
   const [showMenu, setShowMenu] = useState(false);
+  const navigate = useNavigate();
 
   // Scope storage to this user's Kakao ID
   if (user) setAccountId(user.id);
@@ -28,20 +28,24 @@ function AuthenticatedApp() {
     setShowMenu(false);
   };
 
+  const toggleLang = () => {
+    setLang(lang === 'ko' ? 'en' : 'ko');
+  };
+
   return (
     <ProfileProvider>
       <div className="app">
         <div className="app-header">
-          <ProfileSelector />
-          <LangSwitch />
-          <div className="user-menu-wrapper">
-            <button className="user-btn" onClick={() => setShowMenu(!showMenu)}>
+          <span className="app-logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>오늘의 색</span>
+          <div className="header-right">
+            <ProfileSelector />
+            <div className="user-menu-wrapper">
+            <button className="user-btn" onClick={() => setShowMenu(!showMenu)} aria-label="User menu">
               <span className="logout-avatar">
                 {user?.profileImage
                   ? <img src={user.profileImage} alt="" className="logout-img" />
                   : '👤'}
               </span>
-              <span className="logout-name">{user?.nickname}</span>
             </button>
             {showMenu && (
               <>
@@ -55,12 +59,17 @@ function AuthenticatedApp() {
                     </span>
                     <span style={{ fontWeight: 600 }}>{user?.nickname}</span>
                   </div>
+                  <button className="dropdown-item lang-toggle" onClick={toggleLang}>
+                    <span>{lang === 'ko' ? '🇰🇷 한국어' : '🇺🇸 English'}</span>
+                    <span className="lang-toggle-hint">{lang === 'ko' ? '→ EN' : '→ KO'}</span>
+                  </button>
                   <button className="dropdown-item danger" onClick={handleLogout}>
                     {t.logout}
                   </button>
                 </div>
               </>
             )}
+          </div>
           </div>
         </div>
         <Routes>

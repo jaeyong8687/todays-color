@@ -105,6 +105,9 @@ export interface Translations {
     consistency: (count: number) => string;
   };
 
+  // Date formatting
+  formatFullDate: (date: Date) => string;
+
   // Default profile
   defaultProfileName: string;
   defaultUserName: string;

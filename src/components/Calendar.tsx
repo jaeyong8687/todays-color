@@ -90,7 +90,10 @@ export default function Calendar({ records, onSelectDate, selectedDate }: Props)
                 isFuture ? 'future' : '',
                 isSelected ? 'selected' : '',
               ].filter(Boolean).join(' ')}
-              style={record ? { backgroundColor: record.color.hsl } : undefined}
+              style={record ? {
+                backgroundColor: record.color.hsl,
+                boxShadow: `0 2px 8px ${record.color.hsl.replace('hsl', 'hsla').replace(')', ', 0.3)')}`
+              } : undefined}
               onClick={() => !isFuture && onSelectDate(dateStr)}
             >
               <span className="calendar-day-num">{day}</span>

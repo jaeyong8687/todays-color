@@ -90,9 +90,9 @@ export default function CalendarPage() {
       )}
 
       {!selectedDate && (
-        <div style={{ textAlign: 'center', marginTop: 24, color: 'var(--text-dim)', fontSize: 14 }}>
+        <div className="calendar-hint-area">
           {t.calendarHint}<br/>
-          <span style={{ fontSize: 12 }}>{t.noFuture}</span>
+          <span className="calendar-hint-sub">{t.noFuture}</span>
         </div>
       )}
 

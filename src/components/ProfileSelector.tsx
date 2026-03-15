@@ -20,7 +20,7 @@ export default function ProfileSelector() {
   };
 
   return (
-    <div className="profile-bar">
+    <>
       <div className="profile-chips">
         {profiles.map((p) => (
           <button
@@ -32,45 +32,48 @@ export default function ProfileSelector() {
             <span>{p.name}</span>
           </button>
         ))}
-        <button className="profile-chip add" onClick={() => setShowAdd(!showAdd)}>
-          {t.addProfile}
+        <button className="profile-chip add profile-add-subtle" onClick={() => setShowAdd(!showAdd)}>
+          <span className="profile-add-icon">+</span>
         </button>
       </div>
 
       {showAdd && (
-        <div className="profile-add-form">
-          <div className="profile-emoji-picker">
-            {EMOJI_OPTIONS.map((e) => (
+        <div className="modal-overlay" onClick={() => setShowAdd(false)}>
+          <div className="profile-add-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="profile-emoji-picker">
+              {EMOJI_OPTIONS.map((e) => (
+                <button
+                  key={e}
+                  className={`emoji-btn ${newEmoji === e ? 'active' : ''}`}
+                  onClick={() => setNewEmoji(e)}
+                >
+                  {e}
+                </button>
+              ))}
+            </div>
+            <div className="profile-add-row">
+              <input
+                className="profile-name-input"
+                placeholder={t.profileNamePlaceholder}
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
+                maxLength={10}
+                autoFocus
+              />
+              <button className="btn-small" onClick={handleAdd}>{t.createBtn}</button>
+            </div>
+            {profiles.length > 1 && (
               <button
-                key={e}
-                className={`emoji-btn ${newEmoji === e ? 'active' : ''}`}
-                onClick={() => setNewEmoji(e)}
+                className="btn-text-danger"
+                onClick={() => { removeProfile(activeProfile.id); setShowAdd(false); }}
               >
-                {e}
+                {t.deleteProfile(activeProfile.name)}
               </button>
-            ))}
+            )}
           </div>
-          <div className="profile-add-row">
-            <input
-              className="profile-name-input"
-              placeholder={t.profileNamePlaceholder}
-              value={newName}
-              onChange={(e) => setNewName(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
-              maxLength={10}
-            />
-            <button className="btn-small" onClick={handleAdd}>{t.createBtn}</button>
-          </div>
-          {profiles.length > 1 && (
-            <button
-              className="btn-text-danger"
-              onClick={() => { removeProfile(activeProfile.id); setShowAdd(false); }}
-            >
-              {t.deleteProfile(activeProfile.name)}
-            </button>
-          )}
         </div>
       )}
-    </div>
+    </>
   );
 }

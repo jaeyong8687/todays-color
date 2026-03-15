@@ -129,6 +129,12 @@ Respond in a warm, empathetic tone in English, 3-5 paragraphs. Use emojis approp
     consistency: (count) => `You recorded ${count} of the last 7 days. Great habit of reflecting on your emotions!`,
   },
 
+  formatFullDate: (date: Date) => {
+    const weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    return `${weekdays[date.getDay()]}, ${months[date.getMonth()]} ${date.getDate()}`;
+  },
+
   defaultProfileName: 'Me',
   defaultUserName: 'User',
 };
