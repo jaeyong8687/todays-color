@@ -6,19 +6,20 @@ import { getTodayString } from '../utils/storage';
 import { useI18n } from '../i18n';
 
 export default function HomePage() {
-  const { records, save, getByDate } = useColorHistory();
+  const { save, getByDate } = useColorHistory();
   const { t } = useI18n();
   const [saved, setSaved] = useState(false);
   const [savedColor, setSavedColor] = useState<string | null>(null);
 
   const todayRecord = getByDate(getTodayString());
 
-  const handleSave = (color: ColorInfo, emotion: EmotionResult, memo: string) => {
+  const handleSave = (color: ColorInfo, emotion: EmotionResult, memo: string, tags?: string[]) => {
     const record: ColorRecord = {
       date: getTodayString(),
       color,
       memo,
       emotion,
+      tags,
     };
     save(record);
     setSavedColor(color.hsl);
@@ -32,6 +33,8 @@ export default function HomePage() {
       <ColorPicker
         onSave={handleSave}
         initialColor={todayRecord?.color}
+        initialMemo={todayRecord?.memo}
+        initialTags={todayRecord?.tags}
       />
 
       {saved && (

@@ -18,8 +18,8 @@ export default function EditRecordModal({ date, existingRecord, onSave, onDelete
     return t.dateFormat(y, m, d);
   };
 
-  const handleSave = (color: ColorInfo, emotion: EmotionResult, memo: string) => {
-    onSave({ date, color, memo, emotion });
+  const handleSave = (color: ColorInfo, emotion: EmotionResult, memo: string, tags?: string[]) => {
+    onSave({ date, color, memo, emotion, tags });
   };
 
   return (
@@ -37,6 +37,8 @@ export default function EditRecordModal({ date, existingRecord, onSave, onDelete
         <ColorPicker
           onSave={handleSave}
           initialColor={existingRecord?.color}
+          initialMemo={existingRecord?.memo}
+          initialTags={existingRecord?.tags}
         />
       </div>
     </div>

@@ -85,9 +85,10 @@ function AuthenticatedApp() {
 
 function AppGate() {
   const { user, loading } = useAuth();
+  const isDev = window.location.port === '3100';
 
-  if (loading) return <div className="app loading-screen">🎨</div>;
-  if (!user) return <LoginPage />;
+  if (loading && !isDev) return <div className="app loading-screen">🎨</div>;
+  if (!user && !isDev) return <LoginPage />;
   return <AuthenticatedApp />;
 }
 

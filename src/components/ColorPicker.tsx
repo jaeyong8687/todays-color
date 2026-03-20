@@ -2,11 +2,15 @@ import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import type { ColorInfo, EmotionResult } from '../types';
 import { createColorFromHSV, getColorDisplayName } from '../utils/colors';
 import { getSuggestedEmotions, analyzeEmotion } from '../utils/emotions';
+import { getRecentTags } from '../utils/storage';
+import { useProfile } from '../hooks/useProfile';
 import { useI18n } from '../i18n';
 
 interface Props {
-  onSave: (color: ColorInfo, emotion: EmotionResult, memo: string) => void;
+  onSave: (color: ColorInfo, emotion: EmotionResult, memo: string, tags?: string[]) => void;
   initialColor?: ColorInfo;
+  initialMemo?: string;
+  initialTags?: string[];
 }
 
 function drawSpectrum(canvas: HTMLCanvasElement) {
@@ -14,21 +18,15 @@ function drawSpectrum(canvas: HTMLCanvasElement) {
   const w = canvas.width;
   const h = canvas.height;
 
-  // X = Hue (rainbow), Y = top:white → middle:vivid → bottom:black
-  // Top third: white → vivid (saturation 0→100, brightness 100)
-  // Middle: vivid (saturation 100, brightness 100)
-  // Bottom third: vivid → black (saturation 100, brightness 100→0)
   for (let x = 0; x < w; x++) {
     const hue = (x / w) * 360;
     for (let y = 0; y < h; y++) {
       const ratio = y / h;
       let s: number, v: number;
       if (ratio < 0.4) {
-        // White → vivid: saturation ramps up, brightness stays 100
         s = (ratio / 0.4) * 100;
         v = 100;
       } else {
-        // Vivid → black: saturation stays 100, brightness drops
         s = 100;
         v = (1 - (ratio - 0.4) / 0.6) * 100;
       }
@@ -63,11 +61,24 @@ function getHSV(x: number, y: number, w: number, h: number) {
   return { h: hue, s, v };
 }
 
-export default function ColorPicker({ onSave, initialColor }: Props) {
+function normalizeTags(tags?: string[]) {
+  return (tags ?? [])
+    .map((tag) => tag.trim())
+    .filter(Boolean)
+    .filter((tag, index, arr) => arr.findIndex((item) => item.toLowerCase() === tag.toLowerCase()) === index)
+    .slice(0, 3);
+}
+
+export default function ColorPicker({ onSave, initialColor, initialMemo = '', initialTags }: Props) {
   const { t } = useI18n();
-  const [selected, setSelected] = useState<ColorInfo | null>(null);
+  const { activeProfile } = useProfile();
+  const normalizedInitialTags = useMemo(() => normalizeTags(initialTags), [initialTags]);
+  const [selected, setSelected] = useState<ColorInfo | null>(initialColor ?? null);
   const [selectedEmotion, setSelectedEmotion] = useState<EmotionResult | null>(null);
-  const [memo, setMemo] = useState('');
+  const [memo, setMemo] = useState(initialMemo);
+  const [tags, setTags] = useState<string[]>(normalizedInitialTags);
+  const [tagInput, setTagInput] = useState('');
+  const [recentTags, setRecentTags] = useState<string[]>([]);
   const [cursorPos, setCursorPos] = useState<{ x: number; y: number } | null>(null);
   const [showDetails, setShowDetails] = useState(false);
 
@@ -80,12 +91,23 @@ export default function ColorPicker({ onSave, initialColor }: Props) {
     [activeColor]
   );
 
+  useEffect(() => {
+    setSelected(initialColor ?? null);
+    setMemo(initialMemo);
+    setTags(normalizedInitialTags);
+    setSelectedEmotion(null);
+    setShowDetails(false);
+  }, [initialColor, initialMemo, normalizedInitialTags]);
+
+  useEffect(() => {
+    setRecentTags(getRecentTags(activeProfile.id));
+  }, [activeProfile.id]);
+
   const getEmotionDisplay = (e: EmotionResult) => {
     const emotionData = t.emotions[e.primary] || t.lightEmotions[e.primary];
     return emotionData ? emotionData.primary : e.primary;
   };
 
-  // Draw canvas to fill wrapper
   const drawCanvas = useCallback(() => {
     const canvas = canvasRef.current;
     const wrapper = wrapperRef.current;
@@ -104,7 +126,6 @@ export default function ColorPicker({ onSave, initialColor }: Props) {
     return () => window.removeEventListener('resize', drawCanvas);
   }, [drawCanvas]);
 
-  // Redraw after first paint (wrapper may not have height yet)
   useEffect(() => {
     const timer = setTimeout(drawCanvas, 100);
     return () => clearTimeout(timer);
@@ -125,6 +146,22 @@ export default function ColorPicker({ onSave, initialColor }: Props) {
     setCursorPos({ x: (x / rect.width) * 100, y: (y / rect.height) * 100 });
   }, []);
 
+  const addTag = useCallback((rawTag: string) => {
+    const nextTag = rawTag.trim();
+    if (!nextTag) return;
+
+    setTags((prev) => {
+      if (prev.length >= 3) return prev;
+      if (prev.some((tag) => tag.toLowerCase() === nextTag.toLowerCase())) return prev;
+      return [...prev, nextTag];
+    });
+    setTagInput('');
+  }, []);
+
+  const removeTag = useCallback((targetTag: string) => {
+    setTags((prev) => prev.filter((tag) => tag.toLowerCase() !== targetTag.toLowerCase()));
+  }, []);
+
   const handlePointerDown = (e: React.PointerEvent) => {
     (e.target as HTMLElement).setPointerCapture(e.pointerId);
     pickColor(e.clientX, e.clientY);
@@ -137,13 +174,17 @@ export default function ColorPicker({ onSave, initialColor }: Props) {
   const handleSave = () => {
     if (!activeColor) return;
     const emotion = selectedEmotion || analyzeEmotion(activeColor);
-    onSave(activeColor, emotion, memo);
+    const normalizedTags = normalizeTags(tags);
+    onSave(activeColor, emotion, memo, normalizedTags.length > 0 ? normalizedTags : undefined);
     setShowDetails(false);
   };
 
+  const availableRecentTags = recentTags.filter(
+    (recentTag) => !tags.some((tag) => tag.toLowerCase() === recentTag.toLowerCase())
+  );
+
   return (
     <div className="picker-fullscreen">
-      {/* Gradient canvas — fills all available space */}
       <div className="spectrum-fill" ref={wrapperRef}>
         <canvas
           ref={canvasRef}
@@ -163,7 +204,6 @@ export default function ColorPicker({ onSave, initialColor }: Props) {
         )}
       </div>
 
-      {/* Bottom bar — color preview + save */}
       {activeColor && (
         <div className="picker-bottom-bar">
           <div
@@ -184,7 +224,69 @@ export default function ColorPicker({ onSave, initialColor }: Props) {
         </div>
       )}
 
-      {/* Memo — always visible when color selected */}
+      {activeColor && (
+        <div className="tag-section">
+          <div className="tag-section-header">
+            <span className="tag-label">{t.emotionTags}</span>
+            <span className="tag-count">{tags.length}/3</span>
+          </div>
+
+          <div className="tag-input-wrap">
+            <input
+              className="tag-input"
+              type="text"
+              value={tagInput}
+              maxLength={20}
+              placeholder={t.tagPlaceholder}
+              onChange={(e) => setTagInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  addTag(tagInput);
+                }
+              }}
+            />
+          </div>
+
+          {tags.length > 0 && (
+            <div className="tag-chip-list">
+              {tags.map((tag) => (
+                <span key={tag} className="tag-chip">
+                  <span>{tag}</span>
+                  <button
+                    type="button"
+                    className="tag-chip-remove"
+                    onClick={() => removeTag(tag)}
+                    aria-label={t.removeTag(tag)}
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+
+          {availableRecentTags.length > 0 && (
+            <div className="recent-tags-section">
+              <div className="recent-tags-label">{t.recentTags}</div>
+              <div className="recent-tags-list">
+                {availableRecentTags.slice(0, 6).map((tag) => (
+                  <button
+                    key={tag}
+                    type="button"
+                    className="recent-tag-chip"
+                    onClick={() => addTag(tag)}
+                    disabled={tags.length >= 3}
+                  >
+                    {tag}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
       {activeColor && (
         <textarea
           className="memo-input memo-compact"
@@ -195,7 +297,6 @@ export default function ColorPicker({ onSave, initialColor }: Props) {
         />
       )}
 
-      {/* Expandable details — mood chips */}
       {showDetails && activeColor && (
         <div className="picker-details-sheet">
           <p className="mood-question-optional">{t.moodQuestion} <span className="optional-tag">optional</span></p>

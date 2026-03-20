@@ -8,6 +8,16 @@ const supabase = SUPABASE_URL && SUPABASE_ANON_KEY
   ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
   : null;
 
+function normalizeTags(tags?: string[]): string[] | undefined {
+  if (!Array.isArray(tags)) return undefined;
+  const normalized = tags
+    .map((tag) => tag.trim())
+    .filter(Boolean)
+    .filter((tag, index, arr) => arr.findIndex((item) => item.toLowerCase() === tag.toLowerCase()) === index)
+    .slice(0, 3);
+  return normalized.length > 0 ? normalized : undefined;
+}
+
 export function isCloudEnabled(): boolean {
   return !!supabase;
 }
@@ -38,6 +48,7 @@ export async function cloudSaveRecord(kakaoUserId: string, profileId: string, re
       color: record.color,
       memo: record.memo,
       emotion: record.emotion,
+      tags: normalizeTags(record.tags) ?? null,
     }, { onConflict: 'kakao_user_id,profile_id,date' });
 
   if (error) console.error('[Supabase] saveRecord:', error);
@@ -106,8 +117,9 @@ function rowToRecord(row: Record<string, unknown>): ColorRecord {
   return {
     date: row.date as string,
     color: row.color as ColorRecord['color'],
-    memo: row.memo as string,
+    memo: (row.memo as string) || '',
     emotion: row.emotion as ColorRecord['emotion'],
+    tags: normalizeTags(row.tags as string[] | undefined),
   };
 }
 
@@ -123,6 +135,7 @@ export async function migrateLocalToCloud(kakaoUserId: string, profileId: string
     color: r.color,
     memo: r.memo,
     emotion: r.emotion,
+    tags: normalizeTags(r.tags) ?? null,
   }));
 
   const { error } = await supabase

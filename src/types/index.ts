@@ -13,6 +13,7 @@ export interface ColorRecord {
   color: ColorInfo;
   memo: string;
   emotion: EmotionResult;
+  tags?: string[];
 }
 
 export interface EmotionResult {

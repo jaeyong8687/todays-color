@@ -11,6 +11,20 @@ import {
   migrateLocalToCloud,
 } from '../utils/cloud';
 
+function normalizeRecord(record: ColorRecord): ColorRecord {
+  const tags = record.tags
+    ?.map((tag) => tag.trim())
+    .filter(Boolean)
+    .filter((tag, index, arr) => arr.findIndex((item) => item.toLowerCase() === tag.toLowerCase()) === index)
+    .slice(0, 3);
+
+  return {
+    ...record,
+    memo: record.memo ?? '',
+    tags: tags && tags.length > 0 ? tags : undefined,
+  };
+}
+
 export function useColorHistory() {
   const { activeProfile } = useProfile();
   const { user } = useAuth();
@@ -18,17 +32,14 @@ export function useColorHistory() {
   const uid = user?.id || 'local';
   const [records, setRecords] = useState<ColorRecord[]>(() => getRecords(pid));
 
-  // Load from cloud on mount / profile change
   useEffect(() => {
     const localRecords = getRecords(pid);
     setRecords(localRecords);
 
     if (isCloudEnabled() && uid !== 'local') {
-      // Migrate local data to cloud (idempotent upsert)
       if (localRecords.length > 0) {
         migrateLocalToCloud(uid, pid, localRecords);
       }
-      // Then load from cloud (source of truth)
       cloudGetRecords(uid, pid).then((cloudRecords) => {
         if (cloudRecords.length > 0) {
           setRecords(cloudRecords);
@@ -47,10 +58,11 @@ export function useColorHistory() {
   }, [pid, uid]);
 
   const save = useCallback((record: ColorRecord) => {
-    saveRecord(pid, record);
+    const nextRecord = normalizeRecord(record);
+    saveRecord(pid, nextRecord);
     setRecords(getRecords(pid));
     if (isCloudEnabled() && uid !== 'local') {
-      cloudSaveRecord(uid, pid, record);
+      cloudSaveRecord(uid, pid, nextRecord);
     }
   }, [pid, uid]);
 

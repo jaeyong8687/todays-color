@@ -1,6 +1,5 @@
 import type { ColorRecord } from '../types';
 import type { Translations } from '../i18n/types';
-import { EMOTION_COLORS } from './emotions';
 
 export interface Insight {
   emoji: string;

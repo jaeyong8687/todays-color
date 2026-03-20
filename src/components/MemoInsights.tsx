@@ -30,11 +30,6 @@ export default function MemoInsights({ records }: Props) {
     return records.filter((r) => r.date >= cutoffStr);
   }, [records]);
 
-  const weekMemoRecords = useMemo(
-    () => weekRecords.filter((r) => r.memo && r.memo.trim().length > 0),
-    [weekRecords]
-  );
-
   const memoStats = useMemo(() => {
     const total = records.length;
     const withMemo = recordsWithMemo.length;

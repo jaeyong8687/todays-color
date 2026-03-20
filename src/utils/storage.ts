@@ -1,6 +1,7 @@
 import type { ColorRecord, Profile } from '../types';
 
 let _accountId = 'local'; // default for unauthenticated
+const MAX_RECENT_TAGS = 12;
 
 export function setAccountId(id: string) {
   _accountId = id;
@@ -16,6 +17,45 @@ function activeProfileKey() {
 
 function recordsKey(profileId: string) {
   return `todays-color-${_accountId}-${profileId}-records`;
+}
+
+function recentTagsKey(profileId: string) {
+  return `todays-color-${_accountId}-${profileId}-recent-tags`;
+}
+
+function normalizeTags(tags?: string[]): string[] | undefined {
+  if (!Array.isArray(tags)) return undefined;
+
+  const normalized = tags
+    .map((tag) => tag.trim())
+    .filter(Boolean)
+    .filter((tag, index, arr) => arr.findIndex((item) => item.toLowerCase() === tag.toLowerCase()) === index)
+    .slice(0, 3);
+
+  return normalized.length > 0 ? normalized : undefined;
+}
+
+function normalizeRecord(record: ColorRecord): ColorRecord {
+  return {
+    ...record,
+    memo: record.memo ?? '',
+    tags: normalizeTags(record.tags),
+  };
+}
+
+function mergeRecentTags(existing: string[], incoming?: string[]): string[] {
+  if (!incoming || incoming.length === 0) return existing;
+
+  const next = [...existing];
+  for (const tag of incoming) {
+    const normalized = tag.trim();
+    if (!normalized) continue;
+    const existingIndex = next.findIndex((item) => item.toLowerCase() === normalized.toLowerCase());
+    if (existingIndex >= 0) next.splice(existingIndex, 1);
+    next.unshift(normalized);
+  }
+
+  return next.slice(0, MAX_RECENT_TAGS);
 }
 
 // --- Profile management ---
@@ -49,6 +89,7 @@ export function deleteProfile(id: string): void {
   const profiles = getProfiles().filter((p) => p.id !== id);
   saveProfiles(profiles);
   localStorage.removeItem(recordsKey(id));
+  localStorage.removeItem(recentTagsKey(id));
 }
 
 export function getActiveProfileId(): string {
@@ -63,19 +104,28 @@ export function setActiveProfileId(id: string): void {
 
 export function getRecords(profileId: string): ColorRecord[] {
   const data = localStorage.getItem(recordsKey(profileId));
-  return data ? JSON.parse(data) : [];
+  if (!data) return [];
+
+  try {
+    const parsed = JSON.parse(data) as ColorRecord[];
+    return parsed.map(normalizeRecord);
+  } catch {
+    return [];
+  }
 }
 
 export function saveRecord(profileId: string, record: ColorRecord): void {
   const records = getRecords(profileId);
-  const existingIndex = records.findIndex((r) => r.date === record.date);
+  const normalizedRecord = normalizeRecord(record);
+  const existingIndex = records.findIndex((r) => r.date === normalizedRecord.date);
   if (existingIndex >= 0) {
-    records[existingIndex] = record;
+    records[existingIndex] = normalizedRecord;
   } else {
-    records.push(record);
+    records.push(normalizedRecord);
   }
   records.sort((a, b) => a.date.localeCompare(b.date));
   localStorage.setItem(recordsKey(profileId), JSON.stringify(records));
+  saveRecentTags(profileId, mergeRecentTags(getRecentTags(profileId), normalizedRecord.tags));
 }
 
 export function getRecordByDate(profileId: string, date: string): ColorRecord | undefined {
@@ -85,6 +135,23 @@ export function getRecordByDate(profileId: string, date: string): ColorRecord | 
 export function getRecordsByMonth(profileId: string, year: number, month: number): ColorRecord[] {
   const prefix = `${year}-${String(month).padStart(2, '0')}`;
   return getRecords(profileId).filter((r) => r.date.startsWith(prefix));
+}
+
+export function getRecentTags(profileId: string): string[] {
+  const data = localStorage.getItem(recentTagsKey(profileId));
+  if (!data) return [];
+
+  try {
+    const parsed = JSON.parse(data) as string[];
+    return parsed.map((tag) => tag.trim()).filter(Boolean).slice(0, MAX_RECENT_TAGS);
+  } catch {
+    return [];
+  }
+}
+
+export function saveRecentTags(profileId: string, tags: string[]): void {
+  const normalized = mergeRecentTags([], tags);
+  localStorage.setItem(recentTagsKey(profileId), JSON.stringify(normalized));
 }
 
 export function getTodayString(): string {

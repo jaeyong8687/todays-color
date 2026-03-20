@@ -23,6 +23,10 @@ export const en: Translations = {
   memoPlaceholder: 'Want to say more? Go ahead ✏️',
   saveColor: "Save today's color",
   rePickColor: '← Pick another color',
+  emotionTags: 'Emotion tags',
+  tagPlaceholder: 'Add a tag...',
+  recentTags: 'Recent tags',
+  removeTag: (tag) => `Remove ${tag} tag`,
 
   calendarTitle: 'My Color Calendar 📅',
   weekdays: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
@@ -123,7 +127,7 @@ Respond in a warm, empathetic tone in English, 3-5 paragraphs. Use emojis approp
 
   weekdayNames: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
   insightMessages: {
-    dominantEmotion: (emotion, pct) => `It accounts for ${pct}% of all your records.`,
+    dominantEmotion: (_emotion, pct) => `It accounts for ${pct}% of all your records.`,
     dominantPositive: "You're in an energetic phase!",
     dominantCalm: "You're going through a stable period.",
     dominantDefault: 'Take time to listen to your inner emotions.',
@@ -132,7 +136,7 @@ Respond in a warm, empathetic tone in English, 3-5 paragraphs. Use emojis approp
     weekdayPattern: (day, pct) => `${pct}% of your ${day} records are dark emotions. Try scheduling some rest on those days.`,
     brightColors: (avg) => `Your recent average brightness is ${avg}%. You seem to be in a positive, energetic phase.`,
     darkColors: (avg) => `Your recent average brightness is ${avg}%. If things feel heavy, try talking to someone close.`,
-    emotionStreak: (emotion) => `The same emotion for 5 days straight. Maybe try a new activity or change of scenery?`,
+    emotionStreak: (_emotion) => `The same emotion for 5 days straight. Maybe try a new activity or change of scenery?`,
     consistency: (count) => `You recorded ${count} of the last 7 days. Great habit of reflecting on your emotions!`,
   },
 

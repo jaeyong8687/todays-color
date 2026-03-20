@@ -23,6 +23,10 @@ export const ko: Translations = {
   memoPlaceholder: '더 이야기하고 싶다면 자유롭게 ✏️',
   saveColor: '오늘의 색 저장하기',
   rePickColor: '← 색 다시 고르기',
+  emotionTags: '감정 태그',
+  tagPlaceholder: '태그 추가...',
+  recentTags: '최근 태그',
+  removeTag: (tag) => `${tag} 태그 삭제`,
 
   calendarTitle: '나의 색 캘린더 📅',
   weekdays: ['일', '월', '화', '수', '목', '금', '토'],
@@ -123,7 +127,7 @@ export const ko: Translations = {
 
   weekdayNames: ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'],
   insightMessages: {
-    dominantEmotion: (emotion, pct) => `전체 기록의 ${pct}%를 차지합니다.`,
+    dominantEmotion: (_emotion, pct) => `전체 기록의 ${pct}%를 차지합니다.`,
     dominantPositive: '에너지가 넘치는 시기네요!',
     dominantCalm: '안정적인 시간을 보내고 있어요.',
     dominantDefault: '내면의 감정을 잘 들어보세요.',
@@ -132,7 +136,7 @@ export const ko: Translations = {
     weekdayPattern: (day, pct) => `${day} 기록의 ${pct}%가 어두운 감정이에요. 그 날에 특별히 쉬는 시간을 가져보세요.`,
     brightColors: (avg) => `최근 평균 밝기가 ${avg}%로 높아요. 긍정적이고 활기찬 시기를 보내고 있는 것 같아요.`,
     darkColors: (avg) => `최근 평균 밝기가 ${avg}%로 낮아요. 마음이 무겁다면 가까운 사람과 이야기를 나눠보세요.`,
-    emotionStreak: (emotion) => `최근 5일 연속 같은 감정이에요. 다른 활동이나 환경 변화를 시도해보는 건 어떨까요?`,
+    emotionStreak: (_emotion) => `최근 5일 연속 같은 감정이에요. 다른 활동이나 환경 변화를 시도해보는 건 어떨까요?`,
     consistency: (count) => `지난 7일 중 ${count}일을 기록했어요. 자신의 감정을 돌아보는 좋은 습관이에요!`,
   },
 

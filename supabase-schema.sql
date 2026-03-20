@@ -19,10 +19,17 @@ CREATE TABLE color_records (
   color JSONB NOT NULL,
   memo TEXT DEFAULT '',
   emotion JSONB NOT NULL,
+  tags TEXT[],
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW(),
   PRIMARY KEY (kakao_user_id, profile_id, date)
 );
+
+-- Migration guide for existing projects:
+-- 1) Add the optional tags array column.
+-- 2) Existing rows can remain NULL; the app treats missing tags as optional.
+ALTER TABLE color_records
+ADD COLUMN IF NOT EXISTS tags TEXT[];
 
 -- Indexes for fast queries
 CREATE INDEX idx_records_user_profile ON color_records (kakao_user_id, profile_id);

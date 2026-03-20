@@ -68,6 +68,16 @@ export default function CalendarPage() {
             <span>{selectedRecord.emotion.emoji}</span>
             <span>{getEmotionDisplay(selectedRecord.emotion.primary)} · {getSecondaryDisplay(selectedRecord.emotion.primary)}</span>
           </div>
+          {selectedRecord.tags && selectedRecord.tags.length > 0 && (
+            <div className="record-tags-section">
+              <div className="record-tags-label">{t.emotionTags}</div>
+              <div className="record-tags">
+                {selectedRecord.tags.map((tag) => (
+                  <span key={tag} className="record-tag-chip">#{tag}</span>
+                ))}
+              </div>
+            </div>
+          )}
           {selectedRecord.memo && (
             <div className="record-memo">📝 {selectedRecord.memo}</div>
           )}

@@ -28,6 +28,10 @@ export interface Translations {
   memoPlaceholder: string;
   saveColor: string;
   rePickColor: string;
+  emotionTags: string;
+  tagPlaceholder: string;
+  recentTags: string;
+  removeTag: (tag: string) => string;
 
   // Calendar
   calendarTitle: string;
