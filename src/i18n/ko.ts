@@ -5,6 +5,7 @@ export const ko: Translations = {
   logout: '로그아웃',
   logoutConfirm: '로그아웃 하시겠어요?',
 
+  navRecord: '기록',
   navHome: '오늘의 색',
   navCalendar: '캘린더',
   navAnalysis: '감정 분석',
@@ -16,6 +17,10 @@ export const ko: Translations = {
   homeTitle: '오늘의 색',
   homePrompt: '오늘의 기분을 색으로 표현해보세요',
   todayColor: '오늘의 색',
+    bridgeSaved: '오늘의 색이 기록됐어요',
+  bridgeStreak5: '이번 주 거의 매일 기록했어요!',
+  bridgeStreak3: '좋은 흐름이에요, 계속 가봐요',
+  bridgeKeepGoing: '이번 주 기록을 채워보세요',
   savedToast: '오늘의 색이 저장되었어요.',
 
   confirmColor: '이 색으로 정하기',

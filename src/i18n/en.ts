@@ -5,6 +5,7 @@ export const en: Translations = {
   logout: 'Log out',
   logoutConfirm: 'Are you sure you want to log out?',
 
+  navRecord: 'Record',
   navHome: "Today's Color",
   navCalendar: 'Calendar',
   navAnalysis: 'Analysis',
@@ -16,6 +17,10 @@ export const en: Translations = {
   homeTitle: "Today's Color",
   homePrompt: 'Express your mood with a color',
   todayColor: "Today's color",
+    bridgeSaved: 'Color saved',
+  bridgeStreak5: 'Almost every day this week!',
+  bridgeStreak3: 'Nice streak, keep going',
+  bridgeKeepGoing: 'Fill in your week',
   savedToast: "Today's color has been saved.",
 
   confirmColor: 'Choose this color',

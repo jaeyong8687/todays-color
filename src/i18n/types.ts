@@ -7,6 +7,7 @@ export interface Translations {
   logoutConfirm: string;
 
   // Nav
+  navRecord: string;
   navHome: string;
   navCalendar: string;
   navAnalysis: string;
@@ -20,6 +21,10 @@ export interface Translations {
   homeTitle: string;
   homePrompt: string;
   todayColor: string;
+  bridgeSaved: string;
+  bridgeStreak5: string;
+  bridgeStreak3: string;
+  bridgeKeepGoing: string;
   savedToast: string;
 
   // Color Picker
