@@ -15,22 +15,26 @@ interface Props {
 }
 
 function drawSpectrum(canvas: HTMLCanvasElement) {
-  const ctx = canvas.getContext('2d')!;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
   const w = canvas.width;
   const h = canvas.height;
+  const imageData = ctx.createImageData(w, h);
+  const { data } = imageData;
 
-  for (let x = 0; x < w; x++) {
-    const hue = (x / w) * 360;
-    for (let y = 0; y < h; y++) {
-      const ratio = y / h;
-      let s: number, v: number;
-      if (ratio < 0.4) {
-        s = (ratio / 0.4) * 100;
-        v = 100;
-      } else {
-        s = 100;
-        v = (1 - (ratio - 0.4) / 0.6) * 100;
-      }
+  for (let y = 0; y < h; y++) {
+    const ratio = y / h;
+    let s: number, v: number;
+    if (ratio < 0.4) {
+      s = (ratio / 0.4) * 100;
+      v = 100;
+    } else {
+      s = 100;
+      v = (1 - (ratio - 0.4) / 0.6) * 100;
+    }
+
+    for (let x = 0; x < w; x++) {
+      const hue = (x / w) * 360;
       const sN = s / 100, vN = v / 100;
       const c = vN * sN;
       const x2 = c * (1 - Math.abs(((hue / 60) % 2) - 1));
@@ -42,10 +46,16 @@ function drawSpectrum(canvas: HTMLCanvasElement) {
       else if (hue < 240) { g = x2; b = c; }
       else if (hue < 300) { r = x2; b = c; }
       else { r = c; b = x2; }
-      ctx.fillStyle = `rgb(${Math.round((r + m) * 255)},${Math.round((g + m) * 255)},${Math.round((b + m) * 255)})`;
-      ctx.fillRect(x, y, 1, 1);
+
+      const index = (y * w + x) * 4;
+      data[index] = Math.round((r + m) * 255);
+      data[index + 1] = Math.round((g + m) * 255);
+      data[index + 2] = Math.round((b + m) * 255);
+      data[index + 3] = 255;
     }
   }
+
+  ctx.putImageData(imageData, 0, 0);
 }
 
 function getHSV(x: number, y: number, w: number, h: number) {
@@ -86,11 +96,21 @@ export default function ColorPicker({
   const [tags, setTags] = useState<string[]>(normalizedInitialTags);
   const [tagInput, setTagInput] = useState('');
   const [recentTags, setRecentTags] = useState<string[]>([]);
-  const [cursorPos, setCursorPos] = useState<{ x: number; y: number } | null>(null);
   const [showDetails, setShowDetails] = useState(false);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const cursorRef = useRef<HTMLDivElement>(null);
+  const pendingPointerRef = useRef<{ clientX: number; clientY: number } | null>(null);
+  const interactionFrameRef = useRef<number | null>(null);
+  const resizeFrameRef = useRef<number | null>(null);
+  const isDraggingRef = useRef(false);
+  const spectrumSizeRef = useRef<{ width: number; height: number }>({ width: 0, height: 0 });
+  const latestSelectionRef = useRef<{
+    color: ColorInfo;
+    xRatio: number;
+    yRatio: number;
+  } | null>(null);
 
   const activeColor = selected;
   const suggestions = useMemo(
@@ -115,32 +135,33 @@ export default function ColorPicker({
     return emotionData ? emotionData.primary : e.primary;
   };
 
-  const drawCanvas = useCallback(() => {
-    const canvas = canvasRef.current;
+  const updateCursor = useCallback((xRatio: number, yRatio: number, borderColor: string) => {
+    const cursor = cursorRef.current;
     const wrapper = wrapperRef.current;
-    if (!canvas || !wrapper) return;
-    const w = wrapper.clientWidth;
-    const h = wrapper.clientHeight;
+    if (!cursor || !wrapper) return;
+
+    cursor.style.opacity = '1';
+    cursor.style.borderColor = borderColor;
+    cursor.style.transform = `translate3d(${xRatio * wrapper.clientWidth}px, ${yRatio * wrapper.clientHeight}px, 0) translate3d(-50%, -50%, 0)`;
+  }, []);
+
+  const drawCanvas = useCallback((width: number, height: number) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const w = Math.floor(width);
+    const h = Math.floor(height);
     if (w === 0 || h === 0) return;
+    if (spectrumSizeRef.current.width === w && spectrumSizeRef.current.height === h) return;
+
+    spectrumSizeRef.current = { width: w, height: h };
     canvas.width = w;
     canvas.height = h;
     drawSpectrum(canvas);
   }, []);
 
-  useEffect(() => {
-    drawCanvas();
-    window.addEventListener('resize', drawCanvas);
-    return () => window.removeEventListener('resize', drawCanvas);
-  }, [drawCanvas]);
-
-  useEffect(() => {
-    const timer = setTimeout(drawCanvas, 100);
-    return () => clearTimeout(timer);
-  }, [drawCanvas]);
-
-  const pickColor = useCallback((clientX: number, clientY: number) => {
+  const getSelectionFromPoint = useCallback((clientX: number, clientY: number) => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas) return null;
     const rect = canvas.getBoundingClientRect();
     const x = Math.max(0, Math.min(clientX - rect.left, rect.width - 1));
     const y = Math.max(0, Math.min(clientY - rect.top, rect.height - 1));
@@ -148,10 +169,141 @@ export default function ColorPicker({
     const canvasY = (y / rect.height) * canvas.height;
     const hsv = getHSV(canvasX, canvasY, canvas.width, canvas.height);
     const color = createColorFromHSV(hsv.h, hsv.s, hsv.v);
-    setSelected(color);
-    setSelectedEmotion(null);
-    setCursorPos({ x: (x / rect.width) * 100, y: (y / rect.height) * 100 });
+    return {
+      color,
+      xRatio: x / rect.width,
+      yRatio: y / rect.height,
+    };
   }, []);
+
+  const commitPendingInteraction = useCallback(() => {
+    interactionFrameRef.current = null;
+
+    const pendingPointer = pendingPointerRef.current;
+    if (!pendingPointer) return;
+
+    const selection = getSelectionFromPoint(pendingPointer.clientX, pendingPointer.clientY);
+    if (!selection) return;
+
+    latestSelectionRef.current = selection;
+    updateCursor(
+      selection.xRatio,
+      selection.yRatio,
+      selection.color.lightness > 50 ? '#000' : '#fff'
+    );
+    setSelected((prev) => prev?.hex === selection.color.hex ? prev : selection.color);
+    setSelectedEmotion(null);
+  }, [getSelectionFromPoint, updateCursor]);
+
+  const scheduleInteraction = useCallback((clientX: number, clientY: number) => {
+    pendingPointerRef.current = { clientX, clientY };
+    if (interactionFrameRef.current !== null) return;
+
+    interactionFrameRef.current = window.requestAnimationFrame(commitPendingInteraction);
+  }, [commitPendingInteraction]);
+
+  useEffect(() => {
+    const wrapper = wrapperRef.current;
+    if (!wrapper) return;
+
+    const scheduleDraw = () => {
+      if (resizeFrameRef.current !== null) {
+        window.cancelAnimationFrame(resizeFrameRef.current);
+      }
+
+      resizeFrameRef.current = window.requestAnimationFrame(() => {
+        resizeFrameRef.current = null;
+        drawCanvas(wrapper.clientWidth, wrapper.clientHeight);
+
+        if (latestSelectionRef.current) {
+          updateCursor(
+            latestSelectionRef.current.xRatio,
+            latestSelectionRef.current.yRatio,
+            latestSelectionRef.current.color.lightness > 50 ? '#000' : '#fff'
+          );
+        }
+      });
+    };
+
+    scheduleDraw();
+
+    const resizeObserver = new ResizeObserver(scheduleDraw);
+    resizeObserver.observe(wrapper);
+    window.addEventListener('orientationchange', scheduleDraw, { passive: true });
+
+    return () => {
+      resizeObserver.disconnect();
+      window.removeEventListener('orientationchange', scheduleDraw);
+      if (resizeFrameRef.current !== null) {
+        window.cancelAnimationFrame(resizeFrameRef.current);
+      }
+    };
+  }, [drawCanvas, updateCursor]);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const passiveOptions: AddEventListenerOptions = { passive: true };
+
+    const handleMouseDown = (event: MouseEvent) => {
+      isDraggingRef.current = true;
+      scheduleInteraction(event.clientX, event.clientY);
+    };
+
+    const handleMouseMove = (event: MouseEvent) => {
+      if (!isDraggingRef.current) return;
+      scheduleInteraction(event.clientX, event.clientY);
+    };
+
+    const handleMouseUp = () => {
+      isDraggingRef.current = false;
+      pendingPointerRef.current = null;
+    };
+
+    const handleTouchStart = (event: TouchEvent) => {
+      const touch = event.touches[0];
+      if (!touch) return;
+      isDraggingRef.current = true;
+      scheduleInteraction(touch.clientX, touch.clientY);
+    };
+
+    const handleTouchMove = (event: TouchEvent) => {
+      if (!isDraggingRef.current) return;
+      const touch = event.touches[0];
+      if (!touch) return;
+      scheduleInteraction(touch.clientX, touch.clientY);
+    };
+
+    const handleTouchEnd = () => {
+      isDraggingRef.current = false;
+      pendingPointerRef.current = null;
+    };
+
+    canvas.addEventListener('mousedown', handleMouseDown);
+    window.addEventListener('mousemove', handleMouseMove, passiveOptions);
+    window.addEventListener('mouseup', handleMouseUp);
+
+    canvas.addEventListener('touchstart', handleTouchStart, passiveOptions);
+    window.addEventListener('touchmove', handleTouchMove, passiveOptions);
+    window.addEventListener('touchend', handleTouchEnd, passiveOptions);
+    window.addEventListener('touchcancel', handleTouchEnd, passiveOptions);
+
+    return () => {
+      canvas.removeEventListener('mousedown', handleMouseDown);
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+
+      canvas.removeEventListener('touchstart', handleTouchStart);
+      window.removeEventListener('touchmove', handleTouchMove);
+      window.removeEventListener('touchend', handleTouchEnd);
+      window.removeEventListener('touchcancel', handleTouchEnd);
+
+      if (interactionFrameRef.current !== null) {
+        window.cancelAnimationFrame(interactionFrameRef.current);
+      }
+    };
+  }, [scheduleInteraction]);
 
   const addTag = useCallback((rawTag: string) => {
     const nextTag = rawTag.trim();
@@ -168,15 +320,6 @@ export default function ColorPicker({
   const removeTag = useCallback((targetTag: string) => {
     setTags((prev) => prev.filter((tag) => tag.toLowerCase() !== targetTag.toLowerCase()));
   }, []);
-
-  const handlePointerDown = (e: React.PointerEvent) => {
-    (e.target as HTMLElement).setPointerCapture(e.pointerId);
-    pickColor(e.clientX, e.clientY);
-  };
-
-  const handlePointerMove = (e: React.PointerEvent) => {
-    if (e.buttons > 0) pickColor(e.clientX, e.clientY);
-  };
 
   const handleSave = () => {
     if (!activeColor) return;
@@ -196,19 +339,8 @@ export default function ColorPicker({
         <canvas
           ref={canvasRef}
           className="spectrum-canvas-full"
-          onPointerDown={handlePointerDown}
-          onPointerMove={handlePointerMove}
         />
-        {cursorPos && (
-          <div
-            className="spectrum-cursor-full"
-            style={{
-              left: `${cursorPos.x}%`,
-              top: `${cursorPos.y}%`,
-              borderColor: activeColor && activeColor.lightness > 50 ? '#000' : '#fff',
-            }}
-          />
-        )}
+        <div ref={cursorRef} className="spectrum-cursor-full" />
       </div>
 
       {activeColor && (
@@ -229,6 +361,17 @@ export default function ColorPicker({
             {t.saveColor}
           </button>
         </div>
+      )}
+
+      {activeColor && (
+        <textarea
+          className="memo-input memo-prominent"
+          placeholder={t.memoPlaceholder}
+          rows={2}
+          value={memo}
+          onChange={(e) => setMemo(e.target.value)}
+        />
+
       )}
 
       {activeColor && (
@@ -294,16 +437,6 @@ export default function ColorPicker({
         </div>
       )}
 
-      {activeColor && (
-        <textarea
-          className="memo-input memo-compact"
-          placeholder={t.memoPlaceholder}
-          rows={1}
-          value={memo}
-          onChange={(e) => setMemo(e.target.value)}
-        />
-      )}
-
       {showDetails && activeColor && (
         <div className="picker-details-sheet">
           <p className="mood-question-optional">{t.moodQuestion} <span className="optional-tag">optional</span></p>
@@ -316,7 +449,6 @@ export default function ColorPicker({
                   selectedEmotion?.primary === e.primary ? null : e
                 )}
               >
-                <span className="mood-chip-emoji">{e.emoji}</span>
                 <span>{getEmotionDisplay(e)}</span>
               </button>
             ))}

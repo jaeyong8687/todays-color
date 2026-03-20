@@ -49,8 +49,6 @@ export interface Translations {
   weeklyReviewCardTitle: (label: string) => string;
   weeklyTagSummary: (tag: string, count: number) => string;
   weeklyVividSummary: (day: string) => string;
-  saveAsImage: string;
-  preparingImage: string;
   close: string;
   deleteBtn: string;
 

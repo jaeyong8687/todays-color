@@ -21,7 +21,6 @@ export default function AnalysisPage() {
 
   return (
     <div className="page">
-      <h1 className="page-title">{t.analysisTitle}</h1>
 
       <div className="analysis-tabs">
         {tabs.map((tab) => (

@@ -16,7 +16,7 @@ export const en: Translations = {
   homeTitle: "Today's Color",
   homePrompt: 'Express your mood with a color',
   todayColor: "Today's color",
-  savedToast: "Today's color has been saved!",
+  savedToast: "Today's color has been saved.",
 
   confirmColor: 'Choose this color',
   moodQuestion: 'How are you feeling today?',
@@ -43,8 +43,6 @@ export const en: Translations = {
   weeklyReviewCardTitle: (label) => `${label}, your week in color`,
   weeklyTagSummary: (tag, count) => `Most frequent emotion: "${tag}" (${count})`,
   weeklyVividSummary: (day) => `Most vivid day: ${day}`,
-  saveAsImage: 'Save as image',
-  preparingImage: 'Preparing image...',
   close: 'Close',
   deleteBtn: 'Delete',
 

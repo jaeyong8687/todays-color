@@ -8,9 +8,10 @@ interface Props {
   onSelectDate: (date: string) => void;
   selectedDate?: string | null;
   onViewChange?: (year: number, month: number) => void;
+  onFutureDateClick?: (date: string) => void;
 }
 
-export default function Calendar({ records, onSelectDate, selectedDate, onViewChange }: Props) {
+export default function Calendar({ records, onSelectDate, selectedDate, onViewChange, onFutureDateClick }: Props) {
   const { t } = useI18n();
   const today = new Date();
   const [year, setYear] = useState(today.getFullYear());
@@ -37,16 +38,23 @@ export default function Calendar({ records, onSelectDate, selectedDate, onViewCh
   }, [year, month]);
 
   const prevMonth = () => {
-    if (month === 1) { setYear(year - 1); setMonth(12); }
-    else setMonth(month - 1);
+    if (month === 1) {
+      setYear(year - 1);
+      setMonth(12);
+    } else {
+      setMonth(month - 1);
+    }
   };
 
   const nextMonth = () => {
-    if (month === 12) { setYear(year + 1); setMonth(1); }
-    else setMonth(month + 1);
+    if (month === 12) {
+      setYear(year + 1);
+      setMonth(1);
+    } else {
+      setMonth(month + 1);
+    }
   };
 
-  // Count records this month
   const monthRecordCount = useMemo(() => {
     const prefix = `${year}-${String(month).padStart(2, '0')}`;
     return records.filter((r) => r.date.startsWith(prefix)).length;
@@ -87,7 +95,7 @@ export default function Calendar({ records, onSelectDate, selectedDate, onViewCh
 
           return (
             <div
-              key={i}
+              key={dateStr}
               className={[
                 'calendar-day-large',
                 record ? 'has-color' : '',
@@ -95,15 +103,22 @@ export default function Calendar({ records, onSelectDate, selectedDate, onViewCh
                 isFuture ? 'future' : '',
                 isSelected ? 'selected' : '',
               ].filter(Boolean).join(' ')}
-              style={record ? {
-                backgroundColor: record.color.hsl,
-                boxShadow: `0 2px 8px ${record.color.hsl.replace('hsl', 'hsla').replace(')', ', 0.3)')}`,
-                outline: '1.5px solid rgba(255,255,255,0.15)',
-              } : undefined}
-              onClick={() => onSelectDate(dateStr)}
+              onClick={() => {
+                if (isFuture) {
+                  onFutureDateClick?.(dateStr);
+                  return;
+                }
+                onSelectDate(dateStr);
+              }}
             >
               <span className="calendar-day-num">{day}</span>
-
+              {record && (
+                <span
+                  className="calendar-day-dot"
+                  style={{ backgroundColor: record.color.hsl }}
+                  aria-hidden="true"
+                />
+              )}
             </div>
           );
         })}

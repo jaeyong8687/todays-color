@@ -16,7 +16,7 @@ export const ko: Translations = {
   homeTitle: '오늘의 색',
   homePrompt: '오늘의 기분을 색으로 표현해보세요',
   todayColor: '오늘의 색',
-  savedToast: '오늘의 색이 저장되었어요!',
+  savedToast: '오늘의 색이 저장되었어요.',
 
   confirmColor: '이 색으로 정하기',
   moodQuestion: '오늘 기분이 어때요?',
@@ -43,8 +43,6 @@ export const ko: Translations = {
   weeklyReviewCardTitle: (label) => `${label}, 당신의 일주일`,
   weeklyTagSummary: (tag, count) => `가장 많은 감정: "${tag}" (${count}회)`,
   weeklyVividSummary: (day) => `가장 선명한 날: ${day}`,
-  saveAsImage: '이미지로 저장',
-  preparingImage: '이미지 준비 중...',
   close: '닫기',
   deleteBtn: '삭제',
 

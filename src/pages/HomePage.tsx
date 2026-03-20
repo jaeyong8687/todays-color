@@ -44,7 +44,6 @@ export default function HomePage() {
           <div className="save-celebration-inner" style={savedColor ? {
             borderColor: savedColor,
           } : undefined}>
-            
             <span className="save-celebration-text">{t.savedToast}</span>
           </div>
         </div>

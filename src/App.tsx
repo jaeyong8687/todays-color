@@ -43,6 +43,7 @@ function AuthenticatedApp() {
       <div className="app">
         <div className="app-header">
           <span className="app-logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>오늘의 색</span>
+          <NavBar />
           <div className="header-right">
             <ProfileSelector />
             <div className="user-menu-wrapper">
@@ -89,7 +90,6 @@ function AuthenticatedApp() {
           <Route path="/calendar" element={<CalendarPage />} />
           <Route path="/analysis" element={<AnalysisPage />} />
         </Routes>
-        <NavBar />
       </div>
     </ProfileProvider>
   );

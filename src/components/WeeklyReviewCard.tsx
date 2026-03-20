@@ -45,7 +45,6 @@ function getWeekOfMonth(date: Date) {
   return Math.floor((date.getDate() + offset - 1) / 7) + 1;
 }
 
-
 export default function WeeklyReviewCard({ records, focusDate }: Props) {
   const { t } = useI18n();
 
@@ -91,7 +90,6 @@ export default function WeeklyReviewCard({ records, focusDate }: Props) {
     return { weekLabel, days, topTag, mostVividDay };
   }, [focusDate, records, t]);
 
-
   return (
     <section className="weekly-review-section">
       <div className="weekly-review-heading">{t.weeklyReview}</div>
@@ -119,8 +117,6 @@ export default function WeeklyReviewCard({ records, focusDate }: Props) {
             <p>{t.weeklyVividSummary(summary.mostVividDay.weekdayName)}</p>
           )}
         </div>
-
-
       </div>
     </section>
   );
