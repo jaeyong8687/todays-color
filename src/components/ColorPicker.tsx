@@ -9,6 +9,7 @@ import { useI18n } from '../i18n';
 interface Props {
   onSave: (color: ColorInfo, emotion: EmotionResult, memo: string, tags?: string[]) => void;
   initialColor?: ColorInfo;
+  initialEmotion?: EmotionResult;
   initialMemo?: string;
   initialTags?: string[];
 }
@@ -69,7 +70,13 @@ function normalizeTags(tags?: string[]) {
     .slice(0, 3);
 }
 
-export default function ColorPicker({ onSave, initialColor, initialMemo = '', initialTags }: Props) {
+export default function ColorPicker({
+  onSave,
+  initialColor,
+  initialEmotion,
+  initialMemo = '',
+  initialTags,
+}: Props) {
   const { t } = useI18n();
   const { activeProfile } = useProfile();
   const normalizedInitialTags = useMemo(() => normalizeTags(initialTags), [initialTags]);
@@ -95,9 +102,9 @@ export default function ColorPicker({ onSave, initialColor, initialMemo = '', in
     setSelected(initialColor ?? null);
     setMemo(initialMemo);
     setTags(normalizedInitialTags);
-    setSelectedEmotion(null);
+    setSelectedEmotion(initialEmotion ?? null);
     setShowDetails(false);
-  }, [initialColor, initialMemo, normalizedInitialTags]);
+  }, [initialColor, initialEmotion, initialMemo, normalizedInitialTags]);
 
   useEffect(() => {
     setRecentTags(getRecentTags(activeProfile.id));

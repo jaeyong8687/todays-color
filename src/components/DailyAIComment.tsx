@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import type { ColorRecord } from '../types';
 import { callAI, hasApiKey } from '../utils/ai';
 import { useI18n } from '../i18n';
@@ -14,19 +14,45 @@ export default function DailyAIComment({ record, recentRecords }: Props) {
   const [comment, setComment] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  const recentContextRecords = useMemo(
+    () => recentRecords.filter((item) => item.date !== record.date).slice(-5),
+    [recentRecords, record.date]
+  );
+
+  const cacheKey = useMemo(() => [
+    'ai-comment',
+    lang,
+    record.date,
+    record.color.hex,
+    record.emotion.primary,
+    record.emotion.secondary,
+    record.memo ?? '',
+    (record.tags ?? []).join(','),
+    recentContextRecords.map((item) => `${item.date}-${item.color.hex}-${item.emotion.primary}`).join('|'),
+  ].join('::'), [
+    lang,
+    record.color.hex,
+    record.date,
+    record.emotion.primary,
+    record.emotion.secondary,
+    record.memo,
+    record.tags,
+    recentContextRecords,
+  ]);
+
   useEffect(() => {
     if (!hasApiKey()) return;
 
-    const cacheKey = `ai-comment-${record.date}-${lang}`;
     const cached = sessionStorage.getItem(cacheKey);
     if (cached) {
       setComment(cached);
       return;
     }
 
+    setComment(null);
     setLoading(true);
 
-    const recentContext = recentRecords.slice(-5).map((r) =>
+    const recentContext = recentContextRecords.map((r) =>
       `${r.date}: ${getColorDisplayName(r.color, t)} - ${r.emotion.emoji} ${r.emotion.primary}`
     ).join('\n');
 
@@ -40,6 +66,7 @@ ${recentContext ? `\nRecent days:\n${recentContext}` : ''}`;
 
     callAI(systemPrompt, userMsg, 100)
       .then((result) => {
+        if (!result) return;
         setComment(result);
         sessionStorage.setItem(cacheKey, result);
       })
@@ -47,7 +74,17 @@ ${recentContext ? `\nRecent days:\n${recentContext}` : ''}`;
         // silently fail - daily comment is optional
       })
       .finally(() => setLoading(false));
-  }, [record.date, lang]);
+  }, [
+    cacheKey,
+    lang,
+    recentContextRecords,
+    record.color,
+    record.date,
+    record.emotion.emoji,
+    record.emotion.primary,
+    record.memo,
+    t,
+  ]);
 
   if (!hasApiKey() || (!comment && !loading)) return null;
 

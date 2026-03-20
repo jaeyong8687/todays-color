@@ -37,6 +37,7 @@ export default function EditRecordModal({ date, existingRecord, onSave, onDelete
         <ColorPicker
           onSave={handleSave}
           initialColor={existingRecord?.color}
+          initialEmotion={existingRecord?.emotion}
           initialMemo={existingRecord?.memo}
           initialTags={existingRecord?.tags}
         />

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import type { ColorRecord } from '../types';
 import { callAI, hasApiKey } from '../utils/ai';
 import { getColorDisplayName } from '../utils/colors';
@@ -14,11 +14,12 @@ export default function WeeklyAIReport({ records }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Get last 7 days of records
-  const cutoff = new Date();
-  cutoff.setDate(cutoff.getDate() - 7);
-  const cutoffStr = cutoff.toISOString().slice(0, 10);
-  const weekRecords = records.filter((r) => r.date >= cutoffStr);
+  const weekRecords = useMemo(() => {
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - 7);
+    const cutoffStr = cutoff.toISOString().slice(0, 10);
+    return records.filter((r) => r.date >= cutoffStr);
+  }, [records]);
 
   if (weekRecords.length < 3 || !hasApiKey()) return null;
 
@@ -52,7 +53,7 @@ Warm, friendly tone, concise English. Use emojis.`;
 
     try {
       const result = await callAI(systemPrompt, `This week's records (${weekRecords.length} days):\n${data}`, 600);
-      setReport(result);
+      setReport(result || (lang === 'ko' ? '결과를 받지 못했습니다.' : 'No result received.'));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error');
     } finally {

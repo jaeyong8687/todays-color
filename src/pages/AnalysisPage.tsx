@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import MemoWordCloud from '../components/MemoWordCloud';
 import MemoInsights from '../components/MemoInsights';
+import WeeklyAIReport from '../components/WeeklyAIReport';
 import HueDotChart from '../components/HueDotChart';
 import RadialHueMap from '../components/RadialHueMap';
 import { useColorHistory } from '../hooks/useColorHistory';
@@ -39,6 +40,7 @@ export default function AnalysisPage() {
           <>
             <MemoWordCloud records={records} />
             <MemoInsights records={records} />
+            <WeeklyAIReport records={records} />
           </>
         )}
 
