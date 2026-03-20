@@ -64,6 +64,7 @@ export interface Translations {
   tabEmotion: string;
   tabColor: string;
   tabAI: string;
+  tabMemo: string;
 
   // AI Analysis
   aiTitle: string;

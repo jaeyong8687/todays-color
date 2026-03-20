@@ -56,6 +56,7 @@ export const en: Translations = {
   tabEmotion: 'Emotion',
   tabColor: 'Color',
   tabAI: 'AI',
+  tabMemo: '💬 Memos',
 
   aiTitle: '🤖 AI Deep Analysis',
   aiLocked: (remaining) => `Record ${remaining} more days to unlock AI analysis!`,

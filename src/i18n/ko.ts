@@ -56,6 +56,7 @@ export const ko: Translations = {
   tabEmotion: '감정',
   tabColor: '색상',
   tabAI: 'AI',
+  tabMemo: '💬 메모',
 
   aiTitle: '🤖 AI 심층 분석',
   aiLocked: (remaining) => `${remaining}일 더 기록하면 AI 분석을 받을 수 있어요!`,
