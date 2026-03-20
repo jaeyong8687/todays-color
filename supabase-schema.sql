@@ -36,7 +36,15 @@ CREATE INDEX idx_records_user_profile ON color_records (kakao_user_id, profile_i
 CREATE INDEX idx_records_date ON color_records (date);
 CREATE INDEX idx_profiles_user ON profiles (kakao_user_id);
 
--- Row Level Security (public access via anon key, scoped by kakao_user_id)
+-- Row Level Security
+-- ⚠️  SECURITY NOTE: Current policies use USING(true) which exposes ALL user data
+-- via the anon key. This is acceptable ONLY for personal/prototype use.
+--
+-- For production, either:
+--   A) Move all Supabase calls to a Vercel API route that validates Kakao tokens
+--   B) Use Supabase custom JWT with kakao_user_id as sub claim, then:
+--      USING (auth.uid()::text = kakao_user_id)
+--
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE color_records ENABLE ROW LEVEL SECURITY;
 

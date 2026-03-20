@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { HashRouter, Routes, Route, useNavigate } from 'react-router-dom';
+import { HashRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './hooks/useKakaoAuth';
 import { ProfileProvider } from './hooks/useProfile';
 import { I18nProvider, useI18n } from './i18n';
@@ -11,6 +11,20 @@ import AnalysisPage from './pages/AnalysisPage';
 import LoginPage from './pages/LoginPage';
 import { setAccountId } from './utils/storage';
 import './styles/global.css';
+
+function AnimatedRoutes() {
+  const location = useLocation();
+
+  return (
+    <div key={location.pathname} className="page-enter">
+      <Routes location={location}>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/calendar" element={<CalendarPage />} />
+        <Route path="/analysis" element={<AnalysisPage />} />
+      </Routes>
+    </div>
+  );
+}
 
 function AuthenticatedApp() {
   const { user, login, logout } = useAuth();
@@ -85,11 +99,7 @@ function AuthenticatedApp() {
           </div>
           </div>
         </div>
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/calendar" element={<CalendarPage />} />
-          <Route path="/analysis" element={<AnalysisPage />} />
-        </Routes>
+        <AnimatedRoutes />
       </div>
     </ProfileProvider>
   );

@@ -344,7 +344,7 @@ export default function ColorPicker({
       </div>
 
       {activeColor && (
-        <div className="picker-bottom-bar">
+        <div className="picker-bottom-bar reveal-item" style={{ animationDelay: '0ms' }}>
           <div
             className="picker-color-pill"
             style={{
@@ -365,8 +365,9 @@ export default function ColorPicker({
 
       {activeColor && (
         <textarea
-          className="memo-input memo-prominent"
+          className="memo-input memo-prominent reveal-item"
           placeholder={t.memoPlaceholder}
+          style={{ animationDelay: '80ms' }}
           rows={2}
           value={memo}
           onChange={(e) => setMemo(e.target.value)}
@@ -375,7 +376,7 @@ export default function ColorPicker({
       )}
 
       {activeColor && (
-        <div className="tag-section">
+        <div className="tag-section reveal-item" style={{ animationDelay: '160ms' }}>
           <div className="tag-section-header">
             <span className="tag-label">{t.emotionTags}</span>
             <span className="tag-count">{tags.length}/3</span>
