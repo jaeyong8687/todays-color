@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import EmotionReport from '../components/EmotionReport';
 import HueDotChart from '../components/HueDotChart';
 import RadialHueMap from '../components/RadialHueMap';
@@ -23,29 +24,67 @@ function InsightCard({ insight }: { insight: Insight }) {
   );
 }
 
+type Tab = 'emotion' | 'color' | 'ai';
+
 export default function AnalysisPage() {
   const { records } = useColorHistory();
   const { t } = useI18n();
   const insights = generateInsights(records, t);
+  const [activeTab, setActiveTab] = useState<Tab>('emotion');
+
+  const tabs: { key: Tab; label: string }[] = [
+    { key: 'emotion', label: t.tabEmotion || '감정' },
+    { key: 'color', label: t.tabColor || '색상' },
+    { key: 'ai', label: t.tabAI || 'AI' },
+  ];
 
   return (
     <div className="page">
       <h1 className="page-title">{t.analysisTitle}</h1>
 
-      {insights.length > 0 && (
-        <div className="stat-card">
-          <h3>{t.insights}</h3>
-          {insights.map((insight, i) => (
-            <InsightCard key={i} insight={insight} />
-          ))}
-        </div>
-      )}
+      {/* Tab bar */}
+      <div className="analysis-tabs">
+        {tabs.map((tab) => (
+          <button
+            key={tab.key}
+            className={`analysis-tab ${activeTab === tab.key ? 'active' : ''}`}
+            onClick={() => setActiveTab(tab.key)}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
 
-      <EmotionReport records={records} />
-      <HueDotChart records={records} />
-      <RadialHueMap records={records} />
-      <WeeklyAIReport records={records} />
-      <AIAnalysis records={records} />
+      {/* Tab content */}
+      <div className="analysis-content">
+        {activeTab === 'emotion' && (
+          <>
+            {insights.length > 0 && (
+              <div className="stat-card">
+                <h3>{t.insights}</h3>
+                {insights.map((insight, i) => (
+                  <InsightCard key={i} insight={insight} />
+                ))}
+              </div>
+            )}
+            <EmotionReport records={records} />
+          </>
+        )}
+
+        {activeTab === 'color' && (
+          <div className="analysis-grid">
+            <HueDotChart records={records} />
+            <RadialHueMap records={records} />
+          </div>
+        )}
+
+        {activeTab === 'ai' && (
+          <>
+            <WeeklyAIReport records={records} />
+            <AIAnalysis records={records} />
+          </>
+        )}
+      </div>
     </div>
   );
 }

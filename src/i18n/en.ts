@@ -53,6 +53,9 @@ export const en: Translations = {
   colorDotChart: '🎯 Color Distribution Chart',
   colorRadialMap: '🌈 Color Distribution Map',
   colorMapFrequency: 'Frequency',
+  tabEmotion: 'Emotion',
+  tabColor: 'Color',
+  tabAI: 'AI',
 
   aiTitle: '🤖 AI Deep Analysis',
   aiLocked: (remaining) => `Record ${remaining} more days to unlock AI analysis!`,

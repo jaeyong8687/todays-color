@@ -61,6 +61,9 @@ export interface Translations {
   colorDotChart: string;
   colorRadialMap: string;
   colorMapFrequency: string;
+  tabEmotion: string;
+  tabColor: string;
+  tabAI: string;
 
   // AI Analysis
   aiTitle: string;

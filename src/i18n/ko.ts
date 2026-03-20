@@ -53,6 +53,9 @@ export const ko: Translations = {
   colorDotChart: '🎯 색상 분포 차트',
   colorRadialMap: '🌈 색상 분포 맵',
   colorMapFrequency: '빈도',
+  tabEmotion: '감정',
+  tabColor: '색상',
+  tabAI: 'AI',
 
   aiTitle: '🤖 AI 심층 분석',
   aiLocked: (remaining) => `${remaining}일 더 기록하면 AI 분석을 받을 수 있어요!`,
