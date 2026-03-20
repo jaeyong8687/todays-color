@@ -7,7 +7,6 @@ import NavBar from './components/NavBar';
 import ProfileSelector from './components/ProfileSelector';
 import HomePage from './pages/HomePage';
 import CalendarPage from './pages/CalendarPage';
-import AnalysisPage from './pages/AnalysisPage';
 import LoginPage from './pages/LoginPage';
 import { setAccountId } from './utils/storage';
 import './styles/global.css';
@@ -20,7 +19,6 @@ function AnimatedRoutes() {
       <Routes location={location}>
         <Route path="/" element={<HomePage />} />
         <Route path="/calendar" element={<CalendarPage />} />
-        <Route path="/analysis" element={<AnalysisPage />} />
       </Routes>
     </div>
   );

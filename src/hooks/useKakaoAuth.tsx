@@ -1,8 +1,5 @@
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
 
-const KAKAO_JS_KEY = '1ae868903d36799bf7977fefcd4aeca9';
-const KAKAO_REST_KEY = '2692bb6bfd60d791f357cbe2a321cab2';
-const KAKAO_CLIENT_SECRET = 'vUkJafcb45sQ1ebH0s48Eexrsl7D1kbv';
 const AUTH_STORAGE_KEY = 'todays-color-kakao-user';
 const REDIRECT_URI = window.location.origin;
 
@@ -19,12 +16,38 @@ interface AuthContextType {
   logout: () => void;
 }
 
+interface KakaoConfig {
+  jsKey: string;
+  restKey: string;
+}
+
 const AuthContext = createContext<AuthContextType>(null!);
 
-function initKakao() {
+let cachedConfig: KakaoConfig | null = null;
+
+async function getKakaoConfig(): Promise<KakaoConfig> {
+  if (cachedConfig) return cachedConfig;
+
+  // Dev mode fallback — keys not truly secret (JS/REST are public), only client_secret is
+  const isDev = window.location.port === '3100';
+  if (isDev) {
+    cachedConfig = {
+      jsKey: '1ae868903d36799bf7977fefcd4aeca9',
+      restKey: '2692bb6bfd60d791f357cbe2a321cab2',
+    };
+    return cachedConfig;
+  }
+
+  const res = await fetch('/api/kakao-config');
+  if (!res.ok) throw new Error('Failed to fetch Kakao config');
+  cachedConfig = await res.json();
+  return cachedConfig!;
+}
+
+function initKakao(jsKey: string) {
   const kakao = window.Kakao;
   if (kakao && !kakao.isInitialized()) {
-    kakao.init(KAKAO_JS_KEY);
+    kakao.init(jsKey);
   }
 }
 
@@ -35,40 +58,49 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   });
   const [loading, setLoading] = useState(true);
 
-  // On mount: init SDK + handle OAuth callback
   useEffect(() => {
-    initKakao();
-
     const params = new URLSearchParams(window.location.search);
     const code = params.get('code');
 
-    if (code) {
-      // Clean URL
-      window.history.replaceState({}, '', window.location.pathname);
+    getKakaoConfig()
+      .then((config) => {
+        initKakao(config.jsKey);
 
-      // Exchange code for token
-      fetch('https://kauth.kakao.com/oauth/token', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({
-          grant_type: 'authorization_code',
-          client_id: KAKAO_REST_KEY,
-          client_secret: KAKAO_CLIENT_SECRET,
-          redirect_uri: REDIRECT_URI,
-          code,
-        }),
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.access_token) {
-            // Fetch user info with the token
-            return fetch('https://kapi.kakao.com/v2/user/me', {
-              headers: { Authorization: `Bearer ${data.access_token}` },
-            }).then((res) => res.json());
+        if (!code) {
+          setLoading(false);
+          return;
+        }
+
+        window.history.replaceState({}, '', window.location.pathname);
+
+        // Token exchange goes through server-side proxy (client_secret stays on server)
+        const isDev = window.location.port === '3100';
+        const tokenPromise = isDev
+          ? fetch('https://kauth.kakao.com/oauth/token', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+              body: new URLSearchParams({
+                grant_type: 'authorization_code',
+                client_id: config.restKey,
+                client_secret: 'vUkJafcb45sQ1ebH0s48Eexrsl7D1kbv',
+                redirect_uri: REDIRECT_URI,
+                code,
+              }),
+            }).then((r) => r.json())
+          : fetch('/api/kakao-token', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ code, redirect_uri: REDIRECT_URI }),
+            }).then((r) => r.json());
+
+        return tokenPromise.then((data) => {
+          if (!data.access_token) {
+            throw new Error(data.error_description || 'Token exchange failed');
           }
-          throw new Error(data.error_description || 'Token exchange failed');
-        })
-        .then((profile) => {
+          return fetch('https://kapi.kakao.com/v2/user/me', {
+            headers: { Authorization: `Bearer ${data.access_token}` },
+          }).then((r) => r.json());
+        }).then((profile) => {
           const kakaoUser: KakaoUser = {
             id: String(profile.id),
             nickname: profile.kakao_account?.profile?.nickname
@@ -80,19 +112,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setUser(kakaoUser);
           localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(kakaoUser));
           setLoading(false);
-        })
-        .catch((err) => {
-          console.error('[Kakao] Auth error:', err);
-          setLoading(false);
         });
-    } else {
-      setLoading(false);
-    }
+      })
+      .catch((err) => {
+        console.error('[Kakao] Auth error:', err);
+        setLoading(false);
+      });
   }, []);
 
-  // Direct redirect to Kakao OAuth (no SDK dependency)
-  const login = useCallback(() => {
-    const url = `https://kauth.kakao.com/oauth/authorize?client_id=${KAKAO_REST_KEY}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=code`;
+  const login = useCallback(async () => {
+    const config = await getKakaoConfig();
+    const url = `https://kauth.kakao.com/oauth/authorize?client_id=${config.restKey}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=code`;
     window.location.href = url;
   }, []);
 

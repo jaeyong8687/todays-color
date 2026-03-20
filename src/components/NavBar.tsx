@@ -6,7 +6,6 @@ export default function NavBar() {
   const items = [
     { to: '/', label: t.navRecord },
     { to: '/calendar', label: t.navCalendar },
-    { to: '/analysis', label: t.navAnalysis },
   ];
 
   return (
