@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import MemoInsights from '../components/MemoInsights';
+import MemoWordCloud from '../components/MemoWordCloud';
 import HueDotChart from '../components/HueDotChart';
 import RadialHueMap from '../components/RadialHueMap';
 import AIAnalysis from '../components/AIAnalysis';
@@ -38,7 +39,10 @@ export default function AnalysisPage() {
 
       <div className="analysis-content">
         {activeTab === 'memo' && (
-          <MemoInsights records={records} />
+          <>
+            <MemoWordCloud records={records} />
+            <MemoInsights records={records} />
+          </>
         )}
 
         {activeTab === 'color' && (
