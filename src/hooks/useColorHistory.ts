@@ -9,6 +9,7 @@ import {
   cloudSaveRecord,
   cloudDeleteRecord,
   migrateLocalToCloud,
+  cloudGetFirstUserId,
 } from '../utils/cloud';
 
 function normalizeRecord(record: ColorRecord): ColorRecord {
@@ -29,8 +30,22 @@ export function useColorHistory() {
   const { activeProfile } = useProfile();
   const { user } = useAuth();
   const pid = activeProfile.id;
-  const uid = user?.id || 'local';
+  const isDev = window.location.port === '3100';
+  const [resolvedUid, setResolvedUid] = useState<string>(user?.id || 'local');
   const [records, setRecords] = useState<ColorRecord[]>(() => getRecords(pid));
+
+  // In dev mode without auth, resolve the first cloud user
+  useEffect(() => {
+    if (user?.id) {
+      setResolvedUid(user.id);
+    } else if (isDev && isCloudEnabled()) {
+      cloudGetFirstUserId().then((id) => {
+        if (id) setResolvedUid(id);
+      });
+    }
+  }, [user?.id, isDev]);
+
+  const uid = resolvedUid;
 
   useEffect(() => {
     const localRecords = getRecords(pid);

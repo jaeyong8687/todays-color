@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { HashRouter, Routes, Route, useNavigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './hooks/useKakaoAuth';
 import { ProfileProvider } from './hooks/useProfile';
@@ -13,19 +13,25 @@ import { setAccountId } from './utils/storage';
 import './styles/global.css';
 
 function AuthenticatedApp() {
-  const { user, logout } = useAuth();
+  const { user, login, logout } = useAuth();
   const { t, lang, setLang } = useI18n();
   const [showMenu, setShowMenu] = useState(false);
   const navigate = useNavigate();
 
-  // Scope storage to this user's Kakao ID
-  if (user) setAccountId(user.id);
+  useEffect(() => {
+    setAccountId(user?.id ?? 'local');
+  }, [user?.id]);
 
   const handleLogout = () => {
     if (confirm(t.logoutConfirm)) {
       logout();
     }
     setShowMenu(false);
+  };
+
+  const handleLogin = () => {
+    setShowMenu(false);
+    login();
   };
 
   const toggleLang = () => {
@@ -57,15 +63,21 @@ function AuthenticatedApp() {
                         ? <img src={user.profileImage} alt="" className="logout-img" />
                         : '👤'}
                     </span>
-                    <span style={{ fontWeight: 600 }}>{user?.nickname}</span>
+                    <span style={{ fontWeight: 600 }}>{user?.nickname ?? 'Guest'}</span>
                   </div>
                   <button className="dropdown-item lang-toggle" onClick={toggleLang}>
                     <span>{lang === 'ko' ? '🇰🇷 한국어' : '🇺🇸 English'}</span>
                     <span className="lang-toggle-hint">{lang === 'ko' ? '→ EN' : '→ KO'}</span>
                   </button>
-                  <button className="dropdown-item danger" onClick={handleLogout}>
-                    {t.logout}
-                  </button>
+                  {user ? (
+                    <button className="dropdown-item danger" onClick={handleLogout}>
+                      {t.logout}
+                    </button>
+                  ) : (
+                    <button className="dropdown-item" onClick={handleLogin}>
+                      {t.loginButton}
+                    </button>
+                  )}
                 </div>
               </>
             )}

@@ -111,6 +111,18 @@ export async function cloudDeleteProfile(kakaoUserId: string, profileId: string)
   if (error) console.error('[Supabase] deleteProfile:', error);
 }
 
+
+// --- Dev: get first user for local testing ---
+
+export async function cloudGetFirstUserId(): Promise<string | null> {
+  if (!supabase) return null;
+  const { data, error } = await supabase
+    .from('color_records')
+    .select('kakao_user_id')
+    .limit(1);
+  if (error || !data || data.length === 0) return null;
+  return data[0].kakao_user_id;
+}
 // --- Helpers ---
 
 function rowToRecord(row: Record<string, unknown>): ColorRecord {
