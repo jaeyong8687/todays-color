@@ -18,7 +18,6 @@ export default function NavBar() {
           className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
         >
           <span className="nav-label">{item.label}</span>
-          <span className="nav-item-indicator" aria-hidden="true" />
         </NavLink>
       ))}
     </nav>
