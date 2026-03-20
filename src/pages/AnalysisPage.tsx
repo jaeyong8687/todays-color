@@ -1,14 +1,12 @@
 import { useState } from 'react';
-import MemoInsights from '../components/MemoInsights';
 import MemoWordCloud from '../components/MemoWordCloud';
+import MemoInsights from '../components/MemoInsights';
 import HueDotChart from '../components/HueDotChart';
 import RadialHueMap from '../components/RadialHueMap';
-import AIAnalysis from '../components/AIAnalysis';
-import WeeklyAIReport from '../components/WeeklyAIReport';
 import { useColorHistory } from '../hooks/useColorHistory';
 import { useI18n } from '../i18n';
 
-type Tab = 'memo' | 'color' | 'ai';
+type Tab = 'memo' | 'color';
 
 export default function AnalysisPage() {
   const { records } = useColorHistory();
@@ -18,7 +16,6 @@ export default function AnalysisPage() {
   const tabs: { key: Tab; label: string }[] = [
     { key: 'memo', label: t.tabMemo || '💬 메모' },
     { key: 'color', label: t.tabColor || '🎨 색상' },
-    { key: 'ai', label: t.tabAI || '🤖 AI' },
   ];
 
   return (
@@ -50,13 +47,6 @@ export default function AnalysisPage() {
             <HueDotChart records={records} />
             <RadialHueMap records={records} />
           </div>
-        )}
-
-        {activeTab === 'ai' && (
-          <>
-            <WeeklyAIReport records={records} />
-            <AIAnalysis records={records} />
-          </>
         )}
       </div>
     </div>
