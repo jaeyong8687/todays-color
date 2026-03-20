@@ -128,7 +128,20 @@ export default function MemoWordCloud({ records }: Props) {
   );
   const wordMap = useMemo(() => extractWords(recordsWithMemo), [recordsWithMemo]);
 
-  const size = { w: 340, h: 260 };
+  const [size, setSize] = useState({ w: 340, h: 260 });
+
+  useEffect(() => {
+    const updateSize = () => {
+      const container = containerRef.current;
+      if (container) {
+        const w = Math.min(container.clientWidth - 24, 400);
+        setSize({ w: Math.max(w, 240), h: Math.round(Math.max(w, 240) * 0.76) });
+      }
+    };
+    updateSize();
+    window.addEventListener('resize', updateSize);
+    return () => window.removeEventListener('resize', updateSize);
+  }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;

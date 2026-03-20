@@ -121,7 +121,20 @@ export default function RadialHueMap({ records }: Props) {
   const dotsRef = useRef<PlottedDot[]>([]);
   const { t } = useI18n();
 
-  const size = 340;
+  const [size, setSize] = useState(340);
+
+  useEffect(() => {
+    const updateSize = () => {
+      const container = containerRef.current;
+      if (container) {
+        const w = Math.min(container.clientWidth - 24, 400);
+        setSize(Math.max(w, 240));
+      }
+    };
+    updateSize();
+    window.addEventListener('resize', updateSize);
+    return () => window.removeEventListener('resize', updateSize);
+  }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;
