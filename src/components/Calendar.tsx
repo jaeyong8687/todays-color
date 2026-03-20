@@ -97,14 +97,13 @@ export default function Calendar({ records, onSelectDate, selectedDate, onViewCh
               ].filter(Boolean).join(' ')}
               style={record ? {
                 backgroundColor: record.color.hsl,
-                boxShadow: `0 2px 8px ${record.color.hsl.replace('hsl', 'hsla').replace(')', ', 0.3)')}`
+                boxShadow: `0 2px 8px ${record.color.hsl.replace('hsl', 'hsla').replace(')', ', 0.3)')}`,
+                outline: '1.5px solid rgba(255,255,255,0.15)',
               } : undefined}
-              onClick={() => !isFuture && onSelectDate(dateStr)}
+              onClick={() => onSelectDate(dateStr)}
             >
               <span className="calendar-day-num">{day}</span>
-              {record && (
-                <span className="calendar-day-emoji">{record.emotion.emoji}</span>
-              )}
+
             </div>
           );
         })}

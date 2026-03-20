@@ -67,7 +67,7 @@ export default function EmotionReport({ records }: Props) {
   if (records.length === 0) {
     return (
       <div className="empty-state">
-        <div className="empty-icon">📊</div>
+        <div className="empty-icon">—</div>
         <p>{t.emptyState.split('\n').map((line, i, arr) => (
           <span key={i}>{line}{i < arr.length - 1 && <br />}</span>
         ))}</p>

@@ -57,7 +57,7 @@ export default function AIAnalysis({ records }: Props) {
 
       {error && (
         <div className="ai-error">
-          <p>❌ {error}</p>
+          <p>{error}</p>
           <button className="btn-secondary" onClick={runAnalysis}>
             {t.aiRetry}
           </button>

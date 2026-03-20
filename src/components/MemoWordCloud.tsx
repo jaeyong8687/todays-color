@@ -194,7 +194,7 @@ export default function MemoWordCloud({ records }: Props) {
     }
   };
 
-  const title = lang === 'ko' ? '☁️ 메모 워드클라우드' : '☁️ Memo Word Cloud';
+  const title = lang === 'ko' ? '메모 워드클라우드' : 'Memo Word Cloud';
   const noDataMsg = lang === 'ko' ? '메모가 있는 기록이 필요해요' : 'Need records with memos';
 
   if (recordsWithMemo.length < 2 || wordMap.size < 3) {
@@ -202,7 +202,7 @@ export default function MemoWordCloud({ records }: Props) {
       <div className="stat-card">
         <h3>{title}</h3>
         <div style={{ textAlign: 'center', padding: '24px 0', color: 'var(--text-dim)', fontSize: 13 }}>
-          ☁️ {noDataMsg}
+          {noDataMsg}
         </div>
       </div>
     );

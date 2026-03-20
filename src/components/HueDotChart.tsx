@@ -94,7 +94,7 @@ export default function HueDotChart({ records }: Props) {
           },
           afterLabel: (item: any) => {
             const d = data[item.dataIndex];
-            return d?.memo ? `💬 ${d.memo.slice(0, 30)}` : '';
+            return d?.memo ? d.memo.slice(0, 30) : '';
           },
         },
       },
@@ -137,7 +137,7 @@ export default function HueDotChart({ records }: Props) {
 
   return (
     <div className="stat-card">
-      <h3>{t.colorDotChart || '🎯 색상 분포 차트'}</h3>
+      <h3>{t.colorDotChart || '색상 분포 차트'}</h3>
       <div className="chart-container" style={{ height: 280 }}>
         <Scatter data={chartData} options={chartOptions as any} />
       </div>

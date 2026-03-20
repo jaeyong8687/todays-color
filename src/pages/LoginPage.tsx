@@ -24,7 +24,7 @@ export default function LoginPage() {
         {lang === 'ko' ? '🇰🇷' : '🇺🇸'}
       </button>
       <div className="login-card">
-        <div className="login-icon">🎨</div>
+        <div className="login-icon"></div>
         <h1 className="login-title app-logo" style={{ fontSize: 36, WebkitTextFillColor: 'transparent' }}>{t.appName}</h1>
         <p className="login-subtitle">
           {t.loginSubtitle.split('\n').map((line, i, arr) => (

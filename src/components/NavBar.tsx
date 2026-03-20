@@ -7,17 +7,14 @@ export default function NavBar() {
   return (
     <nav className="nav">
       <NavLink to="/" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`} end>
-        <span className="nav-icon">🎨</span>
         <span className="nav-label">{t.navHome}</span>
         <span className="nav-active-dot" />
       </NavLink>
       <NavLink to="/calendar" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-        <span className="nav-icon">📅</span>
         <span className="nav-label">{t.navCalendar}</span>
         <span className="nav-active-dot" />
       </NavLink>
       <NavLink to="/analysis" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-        <span className="nav-icon">🧠</span>
         <span className="nav-label">{t.navAnalysis}</span>
         <span className="nav-active-dot" />
       </NavLink>

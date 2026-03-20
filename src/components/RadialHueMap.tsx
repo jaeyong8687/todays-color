@@ -186,7 +186,7 @@ export default function RadialHueMap({ records }: Props) {
 
   return (
     <div className="stat-card">
-      <h3>{t.colorRadialMap || '🌈 색상 분포 맵'}</h3>
+      <h3>{t.colorRadialMap || '색상 분포 맵'}</h3>
       <div
         ref={containerRef}
         style={{ position: 'relative', display: 'flex', justifyContent: 'center', padding: '12px 0' }}
@@ -224,7 +224,7 @@ export default function RadialHueMap({ records }: Props) {
             </div>
             {hovered.memo && (
               <div style={{ marginTop: 4, color: VIZ.labelColor }}>
-                💬 {hovered.memo.slice(0, 40)}
+                {hovered.memo.slice(0, 40)}
               </div>
             )}
           </div>

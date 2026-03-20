@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import CalendarComponent from '../components/Calendar';
 import EditRecordModal from '../components/EditRecordModal';
 import WeeklyReviewCard from '../components/WeeklyReviewCard';
@@ -13,11 +13,19 @@ export default function CalendarPage() {
   const { t } = useI18n();
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [editing, setEditing] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
   const today = new Date();
   const [viewYear, setViewYear] = useState(today.getFullYear());
   const [viewMonth, setViewMonth] = useState(today.getMonth() + 1);
 
   const selectedRecord = selectedDate ? getByDate(selectedDate) : null;
+
+  useEffect(() => {
+    if (toast) {
+      const timer = setTimeout(() => setToast(null), 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
   const currentMonthPrefix = `${viewYear}-${String(viewMonth).padStart(2, '0')}`;
   const todayStr = getTodayString();
   const weeklyFocusDate = selectedDate?.startsWith(currentMonthPrefix)
@@ -42,7 +50,10 @@ export default function CalendarPage() {
   };
 
   const handleSelectDate = (date: string) => {
-    if (isFutureDate(date)) return;
+    if (isFutureDate(date)) {
+      setToast(t.noFuture);
+      return;
+    }
     setSelectedDate(date);
     setEditing(false);
   };
@@ -96,7 +107,7 @@ export default function CalendarPage() {
             </div>
           )}
           {selectedRecord.memo && (
-            <div className="record-memo">📝 {selectedRecord.memo}</div>
+            <div className="record-memo">{selectedRecord.memo}</div>
           )}
           <button className="btn-secondary" onClick={() => setEditing(true)}>
             {t.editRecord}
@@ -116,11 +127,10 @@ export default function CalendarPage() {
         </div>
       )}
 
-      {!selectedDate && (
-        <div className="calendar-hint-area">
-          {t.calendarHint}<br/>
-          <span className="calendar-hint-sub">{t.noFuture}</span>
-        </div>
+
+
+      {toast && (
+        <div className="toast-message">{toast}</div>
       )}
 
       {editing && selectedDate && (

@@ -15,8 +15,8 @@ export default function AnalysisPage() {
   const [activeTab, setActiveTab] = useState<Tab>('memo');
 
   const tabs: { key: Tab; label: string }[] = [
-    { key: 'memo', label: t.tabMemo || '💬 메모' },
-    { key: 'color', label: t.tabColor || '🎨 색상' },
+    { key: 'memo', label: t.tabMemo || '메모' },
+    { key: 'color', label: t.tabColor || '색상' },
   ];
 
   return (

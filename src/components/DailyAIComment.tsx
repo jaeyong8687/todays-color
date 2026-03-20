@@ -90,7 +90,7 @@ ${recentContext ? `\nRecent days:\n${recentContext}` : ''}`;
 
   return (
     <div className="daily-ai-comment">
-      {loading && <span className="daily-ai-loading">💭</span>}
+      {loading && <span className="daily-ai-loading">…</span>}
       {comment && <p className="daily-ai-text">{comment}</p>}
     </div>
   );
