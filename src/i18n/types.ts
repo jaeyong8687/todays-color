@@ -58,6 +58,9 @@ export interface Translations {
   recordCount: string;
   totalOfRecords: (total: number, count: number) => string;
   emptyState: string;
+  colorDotChart: string;
+  colorRadialMap: string;
+  colorMapFrequency: string;
 
   // AI Analysis
   aiTitle: string;

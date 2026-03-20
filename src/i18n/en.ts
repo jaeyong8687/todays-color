@@ -50,6 +50,9 @@ export const en: Translations = {
   recordCount: 'Records',
   totalOfRecords: (total, count) => `${count} out of ${total} records`,
   emptyState: "No records yet.\nPick today's color to\nstart your emotion analysis!",
+  colorDotChart: '🎯 Color Distribution Chart',
+  colorRadialMap: '🌈 Color Distribution Map',
+  colorMapFrequency: 'Frequency',
 
   aiTitle: '🤖 AI Deep Analysis',
   aiLocked: (remaining) => `Record ${remaining} more days to unlock AI analysis!`,

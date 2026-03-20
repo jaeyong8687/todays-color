@@ -50,6 +50,9 @@ export const ko: Translations = {
   recordCount: '기록 수',
   totalOfRecords: (total, count) => `총 ${total}개의 기록 중 ${count}번`,
   emptyState: '아직 기록이 없어요.\n오늘의 색을 선택하면\n감정 분석이 시작됩니다!',
+  colorDotChart: '🎯 색상 분포 차트',
+  colorRadialMap: '🌈 색상 분포 맵',
+  colorMapFrequency: '빈도',
 
   aiTitle: '🤖 AI 심층 분석',
   aiLocked: (remaining) => `${remaining}일 더 기록하면 AI 분석을 받을 수 있어요!`,

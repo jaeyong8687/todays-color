@@ -1,4 +1,6 @@
 import EmotionReport from '../components/EmotionReport';
+import HueDotChart from '../components/HueDotChart';
+import RadialHueMap from '../components/RadialHueMap';
 import AIAnalysis from '../components/AIAnalysis';
 import WeeklyAIReport from '../components/WeeklyAIReport';
 import { useColorHistory } from '../hooks/useColorHistory';
@@ -40,6 +42,8 @@ export default function AnalysisPage() {
       )}
 
       <EmotionReport records={records} />
+      <HueDotChart records={records} />
+      <RadialHueMap records={records} />
       <WeeklyAIReport records={records} />
       <AIAnalysis records={records} />
     </div>
