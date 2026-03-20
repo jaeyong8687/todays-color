@@ -18,7 +18,6 @@ interface WordEntry {
   height: number;
 }
 
-// Common Korean stop words to filter out
 const STOP_WORDS = new Set([
   '그', '이', '저', '것', '수', '등', '때', '중', '좀', '더', '안', '못', '잘',
   '너무', '아주', '매우', '정말', '진짜', '되게', '완전',
@@ -37,30 +36,23 @@ const STOP_WORDS = new Set([
 
 function extractWords(records: ColorRecord[]): Map<string, { count: number; colors: string[] }> {
   const wordMap = new Map<string, { count: number; colors: string[] }>();
-
   for (const r of records) {
     if (!r.memo || !r.memo.trim()) continue;
-
-    // Split by whitespace and punctuation, keep Korean and English words
     const words = r.memo
       .toLowerCase()
       .replace(/[^\w\sㄱ-ㅎㅏ-ㅣ가-힣]/g, ' ')
       .split(/\s+/)
       .filter((w) => w.length >= 2 && !STOP_WORDS.has(w));
-
     for (const word of words) {
       const existing = wordMap.get(word);
       if (existing) {
         existing.count++;
-        if (!existing.colors.includes(r.color.hex)) {
-          existing.colors.push(r.color.hex);
-        }
+        if (!existing.colors.includes(r.color.hex)) existing.colors.push(r.color.hex);
       } else {
         wordMap.set(word, { count: 1, colors: [r.color.hex] });
       }
     }
   }
-
   return wordMap;
 }
 
@@ -73,14 +65,12 @@ function layoutWords(
 ): WordEntry[] {
   const sorted = [...wordMap.entries()]
     .sort((a, b) => b[1].count - a[1].count)
-    .slice(0, 40); // Top 40 words
-
+    .slice(0, 40);
   if (sorted.length === 0) return [];
 
   const maxCount = sorted[0][1].count;
   const minSize = 12;
   const maxSize = 36;
-
   const placed: WordEntry[] = [];
   const cx = width / 2;
   const cy = height / 2;
@@ -91,32 +81,27 @@ function layoutWords(
     const estWidth = text.length * fontSize * 0.65;
     const estHeight = fontSize * 1.3;
 
-    // Spiral placement
-    let placed_ = false;
+    let didPlace = false;
     for (let t = 0; t < 500; t++) {
       const angle = t * 0.15;
       const radius = t * 0.8;
       const x = cx + radius * Math.cos(angle) - estWidth / 2;
       const y = cy + radius * Math.sin(angle) - estHeight / 2;
-
       if (x < 4 || y < 4 || x + estWidth > width - 4 || y + estHeight > height - 4) continue;
 
       const overlaps = placed.some((p) =>
-        x < p.x + p.width + 4 &&
-        x + estWidth + 4 > p.x &&
-        y < p.y + p.height + 2 &&
-        y + estHeight + 2 > p.y
+        x < p.x + p.width + 4 && x + estWidth + 4 > p.x &&
+        y < p.y + p.height + 2 && y + estHeight + 2 > p.y
       );
 
       if (!overlaps) {
         placed.push({ text, count, fontSize, color, x, y, width: estWidth, height: estHeight });
-        placed_ = true;
+        didPlace = true;
         break;
       }
     }
 
-    if (!placed_ && placed.length < 10) {
-      // Force place small words at edges
+    if (!didPlace && placed.length < 10) {
       placed.push({
         text, count, fontSize: minSize, color,
         x: Math.random() * (width - 60) + 4,
@@ -126,12 +111,12 @@ function layoutWords(
       });
     }
   }
-
   return placed;
 }
 
 export default function MemoWordCloud({ records }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [hoveredWord, setHoveredWord] = useState<WordEntry | null>(null);
   const [tooltipPos, setTooltipPos] = useState<{ x: number; y: number } | null>(null);
   const wordsRef = useRef<WordEntry[]>([]);
@@ -141,7 +126,6 @@ export default function MemoWordCloud({ records }: Props) {
     () => records.filter((r) => r.memo && r.memo.trim().length > 0),
     [records]
   );
-
   const wordMap = useMemo(() => extractWords(recordsWithMemo), [recordsWithMemo]);
 
   const size = { w: 340, h: 260 };
@@ -149,7 +133,6 @@ export default function MemoWordCloud({ records }: Props) {
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas || wordMap.size === 0) return;
-
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
@@ -161,7 +144,6 @@ export default function MemoWordCloud({ records }: Props) {
 
     const words = layoutWords(wordMap, size.w, size.h);
     wordsRef.current = words;
-
     ctx.clearRect(0, 0, size.w, size.h);
 
     for (const w of words) {
@@ -175,10 +157,12 @@ export default function MemoWordCloud({ records }: Props) {
 
   const handleMouseMove = (e: React.MouseEvent) => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    const container = containerRef.current;
+    if (!canvas || !container) return;
+
     const rect = canvas.getBoundingClientRect();
-    const mx = e.clientX - rect.left;
-    const my = e.clientY - rect.top;
+    const mx = (e.clientX - rect.left) * (size.w / rect.width);
+    const my = (e.clientY - rect.top) * (size.h / rect.height);
 
     const found = wordsRef.current.find((w) =>
       mx >= w.x && mx <= w.x + w.width && my >= w.y && my <= w.y + w.height
@@ -186,7 +170,11 @@ export default function MemoWordCloud({ records }: Props) {
 
     if (found) {
       setHoveredWord(found);
-      setTooltipPos({ x: e.clientX, y: e.clientY });
+      const cRect = container.getBoundingClientRect();
+      setTooltipPos({
+        x: e.clientX - cRect.left + 12,
+        y: e.clientY - cRect.top - 30,
+      });
     } else {
       setHoveredWord(null);
       setTooltipPos(null);
@@ -194,9 +182,7 @@ export default function MemoWordCloud({ records }: Props) {
   };
 
   const title = lang === 'ko' ? '☁️ 메모 워드클라우드' : '☁️ Memo Word Cloud';
-  const noDataMsg = lang === 'ko'
-    ? '메모가 있는 기록이 필요해요'
-    : 'Need records with memos';
+  const noDataMsg = lang === 'ko' ? '메모가 있는 기록이 필요해요' : 'Need records with memos';
 
   if (recordsWithMemo.length < 2 || wordMap.size < 3) {
     return (
@@ -212,7 +198,10 @@ export default function MemoWordCloud({ records }: Props) {
   return (
     <div className="stat-card">
       <h3>{title}</h3>
-      <div style={{ position: 'relative', display: 'flex', justifyContent: 'center', padding: '8px 0' }}>
+      <div
+        ref={containerRef}
+        style={{ position: 'relative', display: 'flex', justifyContent: 'center', padding: '8px 0' }}
+      >
         <canvas
           ref={canvasRef}
           onMouseMove={handleMouseMove}
@@ -221,9 +210,9 @@ export default function MemoWordCloud({ records }: Props) {
         />
         {hoveredWord && tooltipPos && (
           <div style={{
-            position: 'fixed',
-            left: tooltipPos.x + 12,
-            top: tooltipPos.y - 30,
+            position: 'absolute',
+            left: tooltipPos.x,
+            top: tooltipPos.y,
             background: VIZ.tooltipBg,
             color: VIZ.tooltipText,
             border: `1px solid ${VIZ.tooltipBorder}`,
@@ -231,12 +220,11 @@ export default function MemoWordCloud({ records }: Props) {
             padding: '6px 10px',
             fontSize: 12,
             pointerEvents: 'none',
-            zIndex: 100,
+            zIndex: 10,
+            whiteSpace: 'nowrap',
           }}>
             <strong>{hoveredWord.text}</strong>
-            <span style={{ marginLeft: 8, color: VIZ.labelColor }}>
-              ×{hoveredWord.count}
-            </span>
+            <span style={{ marginLeft: 8, color: VIZ.labelColor }}>×{hoveredWord.count}</span>
           </div>
         )}
       </div>
