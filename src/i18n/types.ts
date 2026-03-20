@@ -44,6 +44,13 @@ export interface Translations {
   addColor: string;
   calendarHint: string;
   noFuture: string;
+  weeklyReview: string;
+  reviewWeekLabel: (year: number, month: number, week: number) => string;
+  weeklyReviewCardTitle: (label: string) => string;
+  weeklyTagSummary: (tag: string, count: number) => string;
+  weeklyVividSummary: (day: string) => string;
+  saveAsImage: string;
+  preparingImage: string;
   close: string;
   deleteBtn: string;
 

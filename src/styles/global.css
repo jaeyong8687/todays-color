@@ -1948,6 +1948,140 @@ button {
   }
 }
 
+.weekly-review-section {
+  width: 100%;
+  max-width: 100%;
+  margin-top: 16px;
+}
+
+.weekly-review-heading {
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto 8px;
+  padding: 0 4px;
+  font-size: 14px;
+  color: var(--text-dim);
+}
+
+.weekly-review-card {
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 18px;
+  background:
+    radial-gradient(circle at top left, rgba(124, 111, 247, 0.18), transparent 34%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.03));
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius);
+  box-shadow: var(--glass-shadow);
+}
+
+.weekly-review-title {
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.35;
+  margin-bottom: 16px;
+}
+
+.weekly-review-swatches {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.weekly-review-day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.weekly-review-swatch {
+  width: 100%;
+  aspect-ratio: 1 / 1.12;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.weekly-review-swatch.empty {
+  background:
+    linear-gradient(135deg, rgba(255,255,255,0.09), rgba(255,255,255,0.03)),
+    repeating-linear-gradient(
+      -45deg,
+      rgba(255,255,255,0.03),
+      rgba(255,255,255,0.03) 8px,
+      rgba(255,255,255,0.07) 8px,
+      rgba(255,255,255,0.07) 16px
+    );
+}
+
+.weekly-review-day-label {
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+.weekly-review-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.weekly-review-summary p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.weekly-review-action {
+  width: 100%;
+  padding: 13px 18px;
+  border-radius: 14px;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  background: linear-gradient(135deg, #7c6ff7, #5b4ed4);
+  box-shadow: 0 4px 15px rgba(124, 111, 247, 0.35), inset 0 1px 0 rgba(255,255,255,0.15);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+}
+
+.weekly-review-action:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(124, 111, 247, 0.42), inset 0 1px 0 rgba(255,255,255,0.18);
+}
+
+.weekly-review-action:disabled {
+  opacity: 0.7;
+  cursor: wait;
+}
+
+@media (min-width: 768px) {
+  .weekly-review-section {
+    max-width: 640px;
+  }
+
+  .weekly-review-heading,
+  .weekly-review-card {
+    max-width: 640px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .weekly-review-section {
+    max-width: 720px;
+  }
+
+  .weekly-review-heading,
+  .weekly-review-card {
+    max-width: 720px;
+  }
+}
+
 /* Calendar + Analysis pages fill height */
 .page:not(.home-page) {
   overflow-y: auto;

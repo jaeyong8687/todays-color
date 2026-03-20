@@ -38,6 +38,13 @@ export const en: Translations = {
   addColor: '🎨 Add a color for this day',
   calendarHint: 'Tap a date to see the record',
   noFuture: "Future dates can't be selected",
+  weeklyReview: 'Weekly Review',
+  reviewWeekLabel: (_year, month, week) => `${['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][month - 1]} Week ${week}`,
+  weeklyReviewCardTitle: (label) => `${label}, your week in color`,
+  weeklyTagSummary: (tag, count) => `✨ Most frequent emotion: "${tag}" (${count})`,
+  weeklyVividSummary: (day) => `🔴 Most vivid day: ${day}`,
+  saveAsImage: '📷 Save as image',
+  preparingImage: 'Preparing image...',
   close: '✕ Close',
   deleteBtn: 'Delete',
 

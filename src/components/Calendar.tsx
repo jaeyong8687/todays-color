@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { ColorRecord } from '../types';
 import { getTodayString, isFutureDate } from '../utils/storage';
 import { useI18n } from '../i18n';
@@ -7,9 +7,10 @@ interface Props {
   records: ColorRecord[];
   onSelectDate: (date: string) => void;
   selectedDate?: string | null;
+  onViewChange?: (year: number, month: number) => void;
 }
 
-export default function Calendar({ records, onSelectDate, selectedDate }: Props) {
+export default function Calendar({ records, onSelectDate, selectedDate, onViewChange }: Props) {
   const { t } = useI18n();
   const today = new Date();
   const [year, setYear] = useState(today.getFullYear());
@@ -50,6 +51,10 @@ export default function Calendar({ records, onSelectDate, selectedDate }: Props)
     const prefix = `${year}-${String(month).padStart(2, '0')}`;
     return records.filter((r) => r.date.startsWith(prefix)).length;
   }, [records, year, month]);
+
+  useEffect(() => {
+    onViewChange?.(year, month);
+  }, [month, onViewChange, year]);
 
   return (
     <div className="calendar-large">

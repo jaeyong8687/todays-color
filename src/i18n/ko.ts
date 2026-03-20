@@ -38,6 +38,13 @@ export const ko: Translations = {
   addColor: '🎨 이 날의 색 추가하기',
   calendarHint: '날짜를 눌러 기록을 확인하세요',
   noFuture: '미래 날짜는 선택할 수 없어요',
+  weeklyReview: '이번 주 회고',
+  reviewWeekLabel: (_year, month, week) => `${month}월 ${week}주차`,
+  weeklyReviewCardTitle: (label) => `${label}, 당신의 일주일`,
+  weeklyTagSummary: (tag, count) => `✨ 가장 많은 감정: "${tag}" (${count}회)`,
+  weeklyVividSummary: (day) => `🔴 가장 선명한 날: ${day}`,
+  saveAsImage: '📷 이미지로 저장',
+  preparingImage: '이미지 준비 중...',
   close: '✕ 닫기',
   deleteBtn: '삭제',
 

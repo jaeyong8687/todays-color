@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import CalendarComponent from '../components/Calendar';
 import EditRecordModal from '../components/EditRecordModal';
+import WeeklyReviewCard from '../components/WeeklyReviewCard';
 import { useColorHistory } from '../hooks/useColorHistory';
-import { isFutureDate } from '../utils/storage';
+import { getTodayString, isFutureDate } from '../utils/storage';
 import { getColorDisplayName } from '../utils/colors';
 import { useI18n } from '../i18n';
 import type { ColorRecord } from '../types';
@@ -12,8 +13,18 @@ export default function CalendarPage() {
   const { t } = useI18n();
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [editing, setEditing] = useState(false);
+  const today = new Date();
+  const [viewYear, setViewYear] = useState(today.getFullYear());
+  const [viewMonth, setViewMonth] = useState(today.getMonth() + 1);
 
   const selectedRecord = selectedDate ? getByDate(selectedDate) : null;
+  const currentMonthPrefix = `${viewYear}-${String(viewMonth).padStart(2, '0')}`;
+  const todayStr = getTodayString();
+  const weeklyFocusDate = selectedDate?.startsWith(currentMonthPrefix)
+    ? selectedDate
+    : todayStr.startsWith(currentMonthPrefix)
+      ? todayStr
+      : `${currentMonthPrefix}-01`;
 
   const formatDate = (dateStr: string) => {
     const [y, m, d] = dateStr.split('-');
@@ -57,7 +68,13 @@ export default function CalendarPage() {
         records={records}
         onSelectDate={handleSelectDate}
         selectedDate={selectedDate}
+        onViewChange={(year, month) => {
+          setViewYear(year);
+          setViewMonth(month);
+        }}
       />
+
+      <WeeklyReviewCard records={records} focusDate={weeklyFocusDate} />
 
       {selectedDate && !editing && selectedRecord && (
         <div className="record-detail">
