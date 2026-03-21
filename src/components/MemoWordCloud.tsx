@@ -58,6 +58,21 @@ function extractWords(records: ColorRecord[]): Map<string, { count: number; colo
 
 const DPR = typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1;
 
+
+function ensureVisible(hex: string): string {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  if (luminance > 0.35) return hex;
+  // Boost brightness: blend toward white
+  const boost = 0.5;
+  const nr = Math.round(r + (255 - r) * boost);
+  const ng = Math.round(g + (255 - g) * boost);
+  const nb = Math.round(b + (255 - b) * boost);
+  return '#' + [nr, ng, nb].map(c => c.toString(16).padStart(2, '0')).join('');
+}
+
 function layoutWords(
   wordMap: Map<string, { count: number; colors: string[] }>,
   width: number,
@@ -77,7 +92,7 @@ function layoutWords(
 
   for (const [text, { count, colors }] of sorted) {
     const fontSize = minSize + ((count / maxCount) * (maxSize - minSize));
-    const color = colors[Math.floor(Math.random() * colors.length)];
+    const color = ensureVisible(colors[Math.floor(Math.random() * colors.length)]);
     const estWidth = text.length * fontSize * 0.65;
     const estHeight = fontSize * 1.3;
 
@@ -143,9 +158,19 @@ export default function MemoWordCloud({ records }: Props) {
     return () => window.removeEventListener('resize', updateSize);
   }, []);
 
+  // Memoize layout so hover doesn't re-randomize positions/colors
+  const words = useMemo(
+    () => wordMap.size > 0 ? layoutWords(wordMap, size.w, size.h) : [],
+    [wordMap, size.w, size.h]
+  );
+
+  useEffect(() => {
+    wordsRef.current = words;
+  }, [words]);
+
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas || wordMap.size === 0) return;
+    if (!canvas || words.length === 0) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
@@ -154,19 +179,16 @@ export default function MemoWordCloud({ records }: Props) {
     canvas.style.width = `${size.w}px`;
     canvas.style.height = `${size.h}px`;
     ctx.scale(DPR, DPR);
-
-    const words = layoutWords(wordMap, size.w, size.h);
-    wordsRef.current = words;
     ctx.clearRect(0, 0, size.w, size.h);
 
     for (const w of words) {
       ctx.font = `${w.fontSize >= 24 ? '700' : '500'} ${w.fontSize}px "Noto Sans KR", sans-serif`;
       ctx.fillStyle = w.color;
-      ctx.globalAlpha = w === hoveredWord ? 1 : 0.85;
+      ctx.globalAlpha = hoveredWord && w !== hoveredWord ? 0.3 : 0.85;
       ctx.fillText(w.text, w.x, w.y + w.fontSize);
     }
     ctx.globalAlpha = 1;
-  }, [wordMap, hoveredWord, size.w, size.h]);
+  }, [words, hoveredWord, size.w, size.h]);
 
   const handleMouseMove = (e: React.MouseEvent) => {
     const canvas = canvasRef.current;
@@ -181,7 +203,7 @@ export default function MemoWordCloud({ records }: Props) {
       mx >= w.x && mx <= w.x + w.width && my >= w.y && my <= w.y + w.height
     );
 
-    if (found) {
+    if (found && found !== hoveredWord) {
       setHoveredWord(found);
       const cRect = container.getBoundingClientRect();
       setTooltipPos({
