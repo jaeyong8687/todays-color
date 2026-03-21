@@ -21,7 +21,6 @@ export default function CalendarPage() {
 
   const selectedRecord = selectedDate ? getByDate(selectedDate) : null;
 
-
   const formatDate = (dateStr: string) => {
     const [y, m, d] = dateStr.split('-');
     return t.dateFormat(y, m, d);
@@ -84,7 +83,7 @@ export default function CalendarPage() {
 
       {/* RIGHT: Tiles stacked vertically */}
       <section className="dash-section dash-sidebar">
-        {/* Calendar tile */}
+        {/* Calendar tile with AI trigger buttons */}
         <div className="combined-card">
           <CalendarComponent
             records={records}
@@ -92,7 +91,9 @@ export default function CalendarPage() {
             selectedDate={selectedDate}
             onFutureDateClick={handleFutureDateClick}
           />
-          <WeeklyAIReport records={records} />
+          <div className="ai-trigger-row">
+            <WeeklyAIReport records={records} />
+          </div>
         </div>
 
         {selectedDate && !editing && selectedRecord && (
@@ -134,7 +135,7 @@ export default function CalendarPage() {
           />
         )}
 
-        {/* Memo analysis tile */}
+        {/* Memo tile with word cloud + AI analysis */}
         <div className="combined-card">
           <MemoWordCloud records={records} />
           <MemoInsights records={records} />

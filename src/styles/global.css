@@ -393,6 +393,15 @@ button {
 
 .page.analysis-dashboard {
   align-items: stretch;
+  overflow: hidden;
+}
+
+@media (min-width: 768px) {
+  .page.analysis-dashboard {
+    padding-bottom: 0;
+    height: calc(100vh - 56px);
+    box-sizing: border-box;
+  }
 }
 
 @media (min-width: 768px) {
@@ -2018,7 +2027,7 @@ button {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  padding-bottom: 40px;
+  padding-bottom: 16px;
 }
 
 /* Override ALL max-width caps — cards fill their grid cell */
@@ -2043,34 +2052,50 @@ button {
 }
 
 
-/* ===== TABLET: 768px – 1099px ===== */
+/* ===== TABLET: 768px+ — Viewport-fit bento ===== */
 @media (min-width: 768px) {
   .analysis-dashboard {
     display: grid;
     grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr;
     gap: 20px;
-    align-items: start;
+    align-items: stretch;
+    height: calc(100vh - 96px);
+    padding-bottom: 0;
+    overflow: hidden;
   }
 
   .dash-charts {
     grid-column: 1 / 2;
     grid-row: 1 / -1;
     min-width: 0;
+    min-height: 0;
+    overflow: hidden;
   }
 
   .dash-sidebar {
     grid-column: 2 / 3;
     grid-row: 1 / -1;
     min-width: 0;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255,255,255,0.15) transparent;
   }
 
-  /* Hero chart card stretches to match sidebar height */
-  .dash-charts {
-    align-self: stretch;
+  .dash-sidebar::-webkit-scrollbar {
+    width: 4px;
+  }
+  .dash-sidebar::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.15);
+    border-radius: 2px;
   }
 
   .dash-charts .color-charts-card {
     height: 100%;
+    display: flex;
+    flex-direction: column;
   }
 }
 
@@ -2080,6 +2105,7 @@ button {
   .analysis-dashboard {
     grid-template-columns: 1.618fr 1fr;
     gap: 24px;
+    height: calc(100vh - 104px);
   }
 }
 
@@ -2088,9 +2114,42 @@ button {
 @media (min-width: 1440px) {
   .analysis-dashboard {
     gap: 32px;
-    max-width: 1400px;
+    max-width: 1600px;
     margin-left: auto;
     margin-right: auto;
+  }
+}
+
+/* Sidebar cards flex to fill viewport height */
+@media (min-width: 768px) {
+  .dash-sidebar > .combined-card {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .dash-sidebar > .combined-card > * {
+    min-height: 0;
+    overflow: auto;
+  }
+
+  /* Calendar combined card gets more space */
+  .dash-sidebar > .combined-card:first-child {
+    flex: 1.2;
+  }
+
+  /* Memo combined card gets less */
+  .dash-sidebar > .combined-card:last-of-type {
+    flex: 0.8;
+  }
+
+  /* Record detail takes minimal space */
+  .dash-sidebar > .record-detail {
+    flex-shrink: 0;
+    max-height: 200px;
+    overflow-y: auto;
   }
 }
 
@@ -2267,7 +2326,7 @@ button {
 /* ===== Responsive chart sizing ===== */
 @media (min-width: 768px) {
   .chart-tab-content .chart-container {
-    min-height: 320px;
+    min-height: 200px;
   }
 
   .chart-tab-content {
@@ -2286,12 +2345,126 @@ button {
   }
 
   .chart-tab-content .chart-container {
-    min-height: 380px;
+    min-height: 0;
+    flex: 1;
   }
 }
 
 @media (min-width: 1440px) {
   .chart-tab-content .chart-container {
-    min-height: 420px;
+    min-height: 0;
   }
+}
+
+/* ===== AI Report Modal ===== */
+.ai-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.ai-modal {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 520px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.4);
+  animation: slideUp 0.25s ease-out;
+}
+
+.ai-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.ai-modal-header h3 {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.ai-modal-close {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  font-size: 18px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: all 0.15s;
+}
+.ai-modal-close:hover {
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+}
+
+.ai-modal-body {
+  padding: 20px;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 120px;
+}
+
+.ai-modal-body .ai-report-line {
+  font-size: 14px;
+  line-height: 1.7;
+  margin-bottom: 6px;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(24px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* ===== AI Trigger Buttons ===== */
+.ai-trigger-row {
+  display: flex;
+  gap: 8px;
+  padding: 8px 12px;
+  flex-wrap: wrap;
+}
+
+.btn-ai-trigger {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--text-dim);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.btn-ai-trigger:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+/* Color chart AI tab button */
+.chart-tab-ai {
+  margin-left: auto;
+  font-size: 12px !important;
+  opacity: 0.7;
+  padding: 6px 10px !important;
+}
+.chart-tab-ai:hover {
+  opacity: 1;
 }

@@ -3,6 +3,7 @@ import type { ColorRecord } from '../types';
 import { callAI, hasApiKey } from '../utils/ai';
 import { getColorDisplayName } from '../utils/colors';
 import { useI18n } from '../i18n';
+import AIReportModal from './AIReportModal';
 
 interface Props {
   records: ColorRecord[];
@@ -13,6 +14,7 @@ export default function WeeklyAIReport({ records }: Props) {
   const [report, setReport] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showModal, setShowModal] = useState(false);
 
   const weekRecords = useMemo(() => {
     const cutoff = new Date();
@@ -61,45 +63,33 @@ Warm, friendly tone, concise English. Use emojis.`;
     }
   };
 
-  const title = lang === 'ko' ? '주간 AI 리포트' : 'Weekly AI Report';
   const btnText = lang === 'ko'
-    ? `이번 주 리포트 생성 (${weekRecords.length}일)`
-    : `Generate weekly report (${weekRecords.length} days)`;
+    ? `📊 주간 리포트 (${weekRecords.length}일)`
+    : `📊 Weekly Report (${weekRecords.length}d)`;
+  const title = lang === 'ko' ? '주간 AI 리포트' : 'Weekly AI Report';
   const retryText = lang === 'ko' ? '다시 생성' : 'Generate again';
 
   return (
-    <div className="stat-card">
-      <h3>{title}</h3>
+    <>
+      <button
+        className="btn-ai-trigger"
+        onClick={() => setShowModal(true)}
+      >
+        {btnText}
+      </button>
 
-      {!report && !loading && (
-        <button className="btn-primary" onClick={generateReport}>
-          {btnText}
-        </button>
+      {showModal && (
+        <AIReportModal
+          title={title}
+          report={report}
+          loading={loading}
+          error={error}
+          onGenerate={generateReport}
+          onClose={() => setShowModal(false)}
+          generateLabel={btnText}
+          retryLabel={retryText}
+        />
       )}
-
-      {loading && (
-        <div className="ai-loading">
-          <div className="ai-loading-spinner" />
-          <p>{t.aiLoading}</p>
-        </div>
-      )}
-
-      {error && (
-        <div className="ai-error">
-          <p>{error}</p>
-        </div>
-      )}
-
-      {report && (
-        <div className="ai-report">
-          {report.split('\n').map((line, i) => (
-            line.trim() ? <p key={i} className="ai-report-line">{line}</p> : <br key={i} />
-          ))}
-          <button className="btn-secondary" onClick={() => { setReport(null); }} style={{ marginTop: 12 }}>
-            {retryText}
-          </button>
-        </div>
-      )}
-    </div>
+    </>
   );
 }
