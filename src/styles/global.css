@@ -2003,7 +2003,17 @@ button {
   margin: 0;
 }
 
-/* ===== Analysis Dashboard — single responsive page ===== */
+
+/* =====================================================
+   ANALYSIS DASHBOARD — Redesigned Layout
+   UX Lead: "Charts are the hero. Sidebar breathes."
+   
+   Grid: Golden ratio (1.618:1) on desktop
+   Spacing: 8px rhythm (8 · 16 · 24 · 32)
+   Breakpoints: mobile(<768) / tablet(768-1099) / desktop(1100+)
+   ===================================================== */
+
+/* --- Base: Mobile-first single column --- */
 .analysis-dashboard {
   display: flex;
   flex-direction: column;
@@ -2011,7 +2021,7 @@ button {
   padding-bottom: 40px;
 }
 
-/* Override ALL max-width caps inside dashboard — cards must fill their grid cell */
+/* Override ALL max-width caps — cards fill their grid cell */
 .analysis-dashboard .stat-card,
 .analysis-dashboard .weekly-review-card,
 .analysis-dashboard .weekly-review-section,
@@ -2028,43 +2038,50 @@ button {
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  min-width: 0; /* prevent grid blowout */
+  gap: 16px;
+  min-width: 0;
 }
-/* Tablet+: Charts big left, sidebar tiles right */
+
+
+/* ===== TABLET: 768px – 1099px ===== */
 @media (min-width: 768px) {
   .analysis-dashboard {
     display: grid;
-    grid-template-columns: 3fr 2fr;
-    gap: 16px;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
     align-items: start;
   }
 
   .dash-charts {
     grid-column: 1 / 2;
-    grid-row: 1 / 2;
+    grid-row: 1 / -1;
     min-width: 0;
   }
 
   .dash-sidebar {
     grid-column: 2 / 3;
-    grid-row: 1 / 2;
+    grid-row: 1 / -1;
     min-width: 0;
   }
 }
 
-/* Desktop: wider ratio */
+
+/* ===== DESKTOP: 1100px+ — Golden ratio ===== */
 @media (min-width: 1100px) {
   .analysis-dashboard {
-    grid-template-columns: 1.6fr 1fr;
-    gap: 20px;
+    grid-template-columns: 1.618fr 1fr;
+    gap: 24px;
   }
 }
 
-/* Large desktop */
+
+/* ===== LARGE DESKTOP: 1440px+ ===== */
 @media (min-width: 1440px) {
   .analysis-dashboard {
-    gap: 24px;
+    gap: 32px;
+    max-width: 1400px;
+    margin-left: auto;
+    margin-right: auto;
   }
 }
 
@@ -2094,18 +2111,19 @@ button {
   to { opacity: 1; }
 }
 
-/* ===== Combined Cards — nested components lose their own card chrome ===== */
+
+/* ===== Combined Cards — nested components share a glass container ===== */
 .combined-card {
   background: rgba(255, 255, 255, 0.04);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: var(--radius);
-  padding: 8px;
+  padding: 16px;
   box-shadow: var(--glass-shadow);
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 8px;
   min-width: 0;
   overflow: hidden;
 }
@@ -2128,59 +2146,50 @@ button {
   display: none;
 }
 
-/* Subtle divider between sections inside combined card */
+/* Divider between sections inside combined card */
 .combined-card > :not(:first-child) {
   border-top: 1px solid rgba(255, 255, 255, 0.06);
-  padding-top: 12px;
+  padding-top: 16px;
   margin-top: 8px;
 }
 
-/* Weekly review card inside combined — keep its special gradient bg as subtle */
+/* Weekly review card nested — keep gradient accent */
 .combined-card > .weekly-review-card {
   background: linear-gradient(180deg, rgba(124, 111, 247, 0.06), transparent);
   border-radius: 12px;
   padding: 14px;
 }
 
-/* ===== Chart Tabs (inside combined chart card) ===== */
+@media (min-width: 768px) {
+  .combined-card {
+    padding: 20px;
+  }
+}
+
+@media (min-width: 1100px) {
+  .combined-card {
+    padding: 24px;
+  }
+}
+
+
+/* ===== Color Charts Hero Card ===== */
 .color-charts-card {
   padding: 0;
   overflow: hidden;
-}
-
-@media (min-width: 768px) {
-  .dash-charts .color-charts-card {
-    min-height: 500px;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .dash-charts .chart-tab-content {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .dash-charts .chart-tab-content > .stat-card {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .dash-charts .chart-container {
-    flex: 1;
-    min-height: 400px;
-  }
+  display: flex;
+  flex-direction: column;
 }
 
 .chart-tabs {
   display: flex;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  flex-shrink: 0;
 }
 
 .chart-tab {
   flex: 1;
-  padding: 12px 16px;
+  padding: 14px 16px;
   font-size: 13px;
   font-weight: 500;
   color: var(--text-dim);
@@ -2200,10 +2209,16 @@ button {
   border-bottom-color: rgba(255, 255, 255, 0.4);
 }
 
+/* Chart tab content — THE KEY FIX: flex column so charts grow */
 .chart-tab-content {
-  padding: 16px;
+  padding: 20px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 
+/* Nested stat-card resets — inherit flex growth */
 .chart-tab-content > .stat-card {
   background: none;
   border: none;
@@ -2214,8 +2229,60 @@ button {
   -webkit-backdrop-filter: none;
   border-radius: 0;
   max-width: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .chart-tab-content > .stat-card h3 {
   display: none;
+}
+
+/* CRITICAL: chart-container fills the card. 
+   !important overrides React inline style={{ height: 280 }} */
+.chart-tab-content .chart-container {
+  flex: 1;
+  height: auto !important;
+  min-height: 260px;
+  margin-top: 8px;
+}
+
+/* Radial map container — flex-grow so canvas fills space */
+.chart-tab-content > .stat-card > div {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* ===== Responsive chart sizing ===== */
+@media (min-width: 768px) {
+  .chart-tab-content .chart-container {
+    min-height: 320px;
+  }
+
+  .chart-tab-content {
+    padding: 20px;
+  }
+
+  /* Calendar inside dashboard gets zero padding (combined-card handles it) */
+  .analysis-dashboard .calendar-large {
+    padding: 0;
+  }
+}
+
+@media (min-width: 1100px) {
+  .chart-tab-content {
+    padding: 24px;
+  }
+
+  .chart-tab-content .chart-container {
+    min-height: 380px;
+  }
+}
+
+@media (min-width: 1440px) {
+  .chart-tab-content .chart-container {
+    min-height: 420px;
+  }
 }
