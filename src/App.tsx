@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { HashRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { HashRouter, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './hooks/useKakaoAuth';
 import { ProfileProvider } from './hooks/useProfile';
 import { I18nProvider, useI18n } from './i18n';
@@ -26,6 +26,7 @@ function AnimatedRoutes() {
 
 function AuthenticatedApp() {
   const { user, login, logout } = useAuth();
+  const navigate = useNavigate();
   const { t, lang, setLang } = useI18n();
   const [showMenu, setShowMenu] = useState(false);
   
@@ -54,7 +55,7 @@ function AuthenticatedApp() {
     <ProfileProvider>
       <div className="app">
         <div className="app-header">
-          <span className="app-logo">오늘의 색</span>
+          <span className="app-logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>오늘의 색</span>
           <NavBar />
           <div className="header-right">
             <ProfileSelector />

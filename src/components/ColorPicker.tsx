@@ -1,17 +1,15 @@
-import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import type { ColorInfo, EmotionResult } from '../types';
 import { createColorFromHSV, getColorDisplayName } from '../utils/colors';
-import { getSuggestedEmotions, analyzeEmotion } from '../utils/emotions';
-import { getRecentTags } from '../utils/storage';
-import { useProfile } from '../hooks/useProfile';
+import { analyzeEmotion } from '../utils/emotions';
+
 import { useI18n } from '../i18n';
 
 interface Props {
-  onSave: (color: ColorInfo, emotion: EmotionResult, memo: string, tags?: string[]) => void;
+  onSave: (color: ColorInfo, emotion: EmotionResult, memo: string) => void;
   initialColor?: ColorInfo;
-  initialEmotion?: EmotionResult;
   initialMemo?: string;
-  initialTags?: string[];
+
 }
 
 function drawSpectrum(canvas: HTMLCanvasElement) {
@@ -72,31 +70,14 @@ function getHSV(x: number, y: number, w: number, h: number) {
   return { h: hue, s, v };
 }
 
-function normalizeTags(tags?: string[]) {
-  return (tags ?? [])
-    .map((tag) => tag.trim())
-    .filter(Boolean)
-    .filter((tag, index, arr) => arr.findIndex((item) => item.toLowerCase() === tag.toLowerCase()) === index)
-    .slice(0, 3);
-}
-
 export default function ColorPicker({
   onSave,
   initialColor,
-  initialEmotion,
   initialMemo = '',
-  initialTags,
 }: Props) {
   const { t } = useI18n();
-  const { activeProfile } = useProfile();
-  const normalizedInitialTags = useMemo(() => normalizeTags(initialTags), [initialTags]);
   const [selected, setSelected] = useState<ColorInfo | null>(initialColor ?? null);
-  const [selectedEmotion, setSelectedEmotion] = useState<EmotionResult | null>(null);
   const [memo, setMemo] = useState(initialMemo);
-  const [tags, setTags] = useState<string[]>(normalizedInitialTags);
-  const [tagInput, setTagInput] = useState('');
-  const [recentTags, setRecentTags] = useState<string[]>([]);
-  const [showDetails, setShowDetails] = useState(false);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -112,28 +93,11 @@ export default function ColorPicker({
     yRatio: number;
   } | null>(null);
 
-  const activeColor = selected;
-  const suggestions = useMemo(
-    () => activeColor ? getSuggestedEmotions(activeColor) : [],
-    [activeColor]
-  );
 
   useEffect(() => {
     setSelected(initialColor ?? null);
     setMemo(initialMemo);
-    setTags(normalizedInitialTags);
-    setSelectedEmotion(initialEmotion ?? null);
-    setShowDetails(false);
-  }, [initialColor, initialEmotion, initialMemo, normalizedInitialTags]);
-
-  useEffect(() => {
-    setRecentTags(getRecentTags(activeProfile.id));
-  }, [activeProfile.id]);
-
-  const getEmotionDisplay = (e: EmotionResult) => {
-    const emotionData = t.emotions[e.primary] || t.lightEmotions[e.primary];
-    return emotionData ? emotionData.primary : e.primary;
-  };
+  }, [initialColor, initialMemo]);
 
   const updateCursor = useCallback((xRatio: number, yRatio: number, borderColor: string) => {
     const cursor = cursorRef.current;
@@ -192,7 +156,6 @@ export default function ColorPicker({
       selection.color.lightness > 50 ? '#000' : '#fff'
     );
     setSelected((prev) => prev?.hex === selection.color.hex ? prev : selection.color);
-    setSelectedEmotion(null);
   }, [getSelectionFromPoint, updateCursor]);
 
   const scheduleInteraction = useCallback((clientX: number, clientY: number) => {
@@ -305,33 +268,14 @@ export default function ColorPicker({
     };
   }, [scheduleInteraction]);
 
-  const addTag = useCallback((rawTag: string) => {
-    const nextTag = rawTag.trim();
-    if (!nextTag) return;
 
-    setTags((prev) => {
-      if (prev.length >= 3) return prev;
-      if (prev.some((tag) => tag.toLowerCase() === nextTag.toLowerCase())) return prev;
-      return [...prev, nextTag];
-    });
-    setTagInput('');
-  }, []);
-
-  const removeTag = useCallback((targetTag: string) => {
-    setTags((prev) => prev.filter((tag) => tag.toLowerCase() !== targetTag.toLowerCase()));
-  }, []);
 
   const handleSave = () => {
-    if (!activeColor) return;
-    const emotion = selectedEmotion || analyzeEmotion(activeColor);
-    const normalizedTags = normalizeTags(tags);
-    onSave(activeColor, emotion, memo, normalizedTags.length > 0 ? normalizedTags : undefined);
-    setShowDetails(false);
-  };
+    if (!selected) return;
+    const emotion = analyzeEmotion(selected);
 
-  const availableRecentTags = recentTags.filter(
-    (recentTag) => !tags.some((tag) => tag.toLowerCase() === recentTag.toLowerCase())
-  );
+    onSave(selected, emotion, memo);
+  };
 
   return (
     <div className="picker-fullscreen">
@@ -343,19 +287,17 @@ export default function ColorPicker({
         <div ref={cursorRef} className="spectrum-cursor-full" />
       </div>
 
-      {activeColor && (
+      {selected && (
         <div className="picker-bottom-bar reveal-item" style={{ animationDelay: '0ms' }}>
           <div
             className="picker-color-pill"
             style={{
-              backgroundColor: activeColor.hsl,
-              color: activeColor.lightness > 55 ? '#111' : '#fff',
+              backgroundColor: selected.hsl,
+              color: selected.lightness > 55 ? '#111' : '#fff',
             }}
-            onClick={() => setShowDetails(!showDetails)}
           >
-            <span className="pill-name">{getColorDisplayName(activeColor, t)}</span>
-            <span className="pill-hex">{activeColor.hex.toUpperCase()}</span>
-            <span className="pill-arrow">{showDetails ? '▼' : '▲'}</span>
+            <span className="pill-name">{getColorDisplayName(selected, t)}</span>
+            <span className="pill-hex">{selected.hex.toUpperCase()}</span>
           </div>
           <button className="btn-save" onClick={handleSave}>
             {t.saveColor}
@@ -363,7 +305,7 @@ export default function ColorPicker({
         </div>
       )}
 
-      {activeColor && (
+      {selected && (
         <textarea
           className="memo-input memo-prominent reveal-item"
           placeholder={t.memoPlaceholder}
@@ -375,87 +317,7 @@ export default function ColorPicker({
 
       )}
 
-      {activeColor && (
-        <div className="tag-section reveal-item" style={{ animationDelay: '160ms' }}>
-          <div className="tag-section-header">
-            <span className="tag-label">{t.emotionTags}</span>
-            <span className="tag-count">{tags.length}/3</span>
-          </div>
 
-          <div className="tag-input-wrap">
-            <input
-              className="tag-input"
-              type="text"
-              value={tagInput}
-              maxLength={20}
-              placeholder={t.tagPlaceholder}
-              onChange={(e) => setTagInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  e.preventDefault();
-                  addTag(tagInput);
-                }
-              }}
-            />
-          </div>
-
-          {tags.length > 0 && (
-            <div className="tag-chip-list">
-              {tags.map((tag) => (
-                <span key={tag} className="tag-chip">
-                  <span>{tag}</span>
-                  <button
-                    type="button"
-                    className="tag-chip-remove"
-                    onClick={() => removeTag(tag)}
-                    aria-label={t.removeTag(tag)}
-                  >
-                    ×
-                  </button>
-                </span>
-              ))}
-            </div>
-          )}
-
-          {availableRecentTags.length > 0 && (
-            <div className="recent-tags-section">
-              <div className="recent-tags-label">{t.recentTags}</div>
-              <div className="recent-tags-list">
-                {availableRecentTags.slice(0, 6).map((tag) => (
-                  <button
-                    key={tag}
-                    type="button"
-                    className="recent-tag-chip"
-                    onClick={() => addTag(tag)}
-                    disabled={tags.length >= 3}
-                  >
-                    {tag}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {showDetails && activeColor && (
-        <div className="picker-details-sheet">
-          <p className="mood-question-optional">{t.moodQuestion} <span className="optional-tag">optional</span></p>
-          <div className="mood-chips">
-            {suggestions.map((e) => (
-              <button
-                key={e.primary}
-                className={`mood-chip ${selectedEmotion?.primary === e.primary ? 'active' : ''}`}
-                onClick={() => setSelectedEmotion(
-                  selectedEmotion?.primary === e.primary ? null : e
-                )}
-              >
-                <span>{getEmotionDisplay(e)}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 }

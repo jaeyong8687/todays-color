@@ -82,6 +82,9 @@ export default function HueDotChart({ records }: Props) {
         bodyColor: VIZ.tooltipText,
         borderColor: VIZ.tooltipBorder,
         borderWidth: 1,
+        padding: 12,
+        titleFont: { size: 14 },
+        bodyFont: { size: 13 },
         callbacks: {
           title: (items: any[]) => {
             const idx = items[0]?.dataIndex;
@@ -90,11 +93,11 @@ export default function HueDotChart({ records }: Props) {
           },
           label: (item: any) => {
             const d = data[item.dataIndex];
-            return d ? `${d.name} ${d.hex}` : '';
+            return d ? d.name : '';
           },
           afterLabel: (item: any) => {
             const d = data[item.dataIndex];
-            return d?.memo ? d.memo.slice(0, 30) : '';
+            return d?.memo ? d.memo.slice(0, 50) : '';
           },
         },
       },

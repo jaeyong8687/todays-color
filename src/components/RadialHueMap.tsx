@@ -206,11 +206,11 @@ export default function RadialHueMap({ records }: Props) {
             color: VIZ.tooltipText,
             border: `1px solid ${VIZ.tooltipBorder}`,
             borderRadius: 8,
-            padding: '8px 12px',
-            fontSize: 12,
+            padding: '10px 16px',
+            fontSize: 14,
             pointerEvents: 'none',
             zIndex: 10,
-            maxWidth: 200,
+            maxWidth: 260,
             lineHeight: 1.5,
             whiteSpace: 'nowrap',
           }}>
@@ -220,11 +220,11 @@ export default function RadialHueMap({ records }: Props) {
                 display: 'inline-block', width: 12, height: 12, borderRadius: '50%',
                 background: hovered.hex, border: '1px solid rgba(255,255,255,0.2)',
               }} />
-              {hovered.name} {hovered.hex}
+              {hovered.name}
             </div>
             {hovered.memo && (
               <div style={{ marginTop: 4, color: VIZ.labelColor }}>
-                {hovered.memo.slice(0, 40)}
+                {hovered.memo.slice(0, 60)}
               </div>
             )}
           </div>

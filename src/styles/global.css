@@ -1989,3 +1989,99 @@ button {
   padding-left: 4px;
   margin: 0;
 }
+
+/* ===== Analysis Dashboard — single responsive page ===== */
+.analysis-dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding-bottom: 40px;
+}
+
+.dash-section {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* On desktop: 2-column grid for charts */
+@media (min-width: 768px) {
+  .analysis-dashboard {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto;
+    gap: 24px;
+    align-items: start;
+  }
+
+  .dash-calendar {
+    grid-column: 1 / 2;
+    grid-row: 1 / 2;
+  }
+
+  .dash-charts {
+    grid-column: 2 / 3;
+    grid-row: 1 / 2;
+  }
+
+  .dash-memos {
+    grid-column: 1 / -1;
+    grid-row: 2 / 3;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .dash-memos > :last-child {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Large desktop: 3 columns */
+@media (min-width: 1200px) {
+  .analysis-dashboard {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+
+  .dash-calendar {
+    grid-column: 1 / 2;
+  }
+
+  .dash-charts {
+    grid-column: 2 / 3;
+  }
+
+  .dash-memos {
+    grid-column: 3 / 4;
+    grid-row: 1 / 3;
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+/* ===== Bridge Card Overlay ===== */
+.bridge-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 100;
+  animation: fadeIn 0.2s ease;
+}
+
+.bridge-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 101;
+  width: min(90vw, 360px);
+  margin: 0;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

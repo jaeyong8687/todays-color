@@ -16,13 +16,12 @@ export default function HomePage() {
   const today = getTodayString();
   const todayRecord = getByDate(today);
 
-  const handleSave = (color: ColorInfo, emotion: EmotionResult, memo: string, tags?: string[]) => {
+  const handleSave = (color: ColorInfo, emotion: EmotionResult, memo: string) => {
     const record: ColorRecord = {
       date: getTodayString(),
       color,
       memo,
       emotion,
-      tags,
     };
     save(record);
     setSavedColor(color.hsl);
@@ -36,7 +35,6 @@ export default function HomePage() {
         onSave={handleSave}
         initialColor={todayRecord?.color}
         initialMemo={todayRecord?.memo}
-        initialTags={todayRecord?.tags}
       />
 
       {showBridge && savedColor && (

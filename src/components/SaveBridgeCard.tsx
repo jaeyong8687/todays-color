@@ -38,7 +38,9 @@ export default function SaveBridgeCard({ records, savedColor, onDismiss }: Props
       : t.bridgeKeepGoing;
 
   return (
-    <div className="bridge-card reveal-item" style={{ animationDelay: '100ms' }}>
+    <>
+    <div className="bridge-overlay" onClick={onDismiss} />
+    <div className="bridge-card bridge-modal reveal-item" style={{ animationDelay: '100ms' }}>
       <div className="bridge-header">
         <div className="bridge-dot-current" style={{ background: savedColor }} />
         <span className="bridge-title">{t.bridgeSaved}</span>
@@ -69,15 +71,10 @@ export default function SaveBridgeCard({ records, savedColor, onDismiss }: Props
           className="bridge-btn"
           onClick={() => { onDismiss(); navigate('/calendar'); }}
         >
-          {t.navCalendar}
-        </button>
-        <button
-          className="bridge-btn"
-          onClick={() => { onDismiss(); navigate('/analysis'); }}
-        >
           {t.navAnalysis}
         </button>
       </div>
     </div>
+    </>
   );
 }

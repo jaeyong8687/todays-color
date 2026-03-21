@@ -3,23 +3,15 @@ import { useI18n } from '../i18n';
 
 export default function NavBar() {
   const { t } = useI18n();
-  const items = [
-    { to: '/', label: t.navRecord },
-    { to: '/calendar', label: t.navCalendar },
-  ];
 
   return (
     <nav className="nav">
-      {items.map((item) => (
-        <NavLink
-          key={item.to}
-          to={item.to}
-          end={item.to === '/'}
-          className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
-        >
-          <span className="nav-label">{item.label}</span>
-        </NavLink>
-      ))}
+      <NavLink
+        to="/calendar"
+        className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+      >
+        <span className="nav-label">{t.navAnalysis}</span>
+      </NavLink>
     </nav>
   );
 }
