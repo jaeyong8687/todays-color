@@ -2,7 +2,6 @@ import { useState } from 'react';
 import type { ColorInfo, ColorRecord, EmotionResult } from '../types';
 import ColorPicker from '../components/ColorPicker';
 import SaveBridgeCard from '../components/SaveBridgeCard';
-import DailyAIComment from '../components/DailyAIComment';
 import { useColorHistory } from '../hooks/useColorHistory';
 import { getTodayString } from '../utils/storage';
 import { useI18n } from '../i18n';
@@ -42,13 +41,6 @@ export default function HomePage() {
           records={records}
           savedColor={savedColor}
           onDismiss={() => setShowBridge(false)}
-        />
-      )}
-
-      {todayRecord && !showBridge && (
-        <DailyAIComment
-          record={todayRecord}
-          recentRecords={records.filter((record) => record.date <= today)}
         />
       )}
     </div>

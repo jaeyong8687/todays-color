@@ -2087,19 +2087,10 @@ button {
     grid-row: 1 / -1;
     min-width: 0;
     min-height: 0;
-    overflow-y: auto;
-    overflow-x: hidden;
-    scrollbar-width: thin;
-    scrollbar-color: rgba(255,255,255,0.15) transparent;
+    overflow: hidden;
   }
 
-  .dash-sidebar::-webkit-scrollbar {
-    width: 4px;
-  }
-  .dash-sidebar::-webkit-scrollbar-thumb {
-    background: rgba(255,255,255,0.15);
-    border-radius: 2px;
-  }
+
 
   .dash-charts .color-charts-card {
     height: 100%;
@@ -2129,7 +2120,7 @@ button {
   }
 }
 
-/* Sidebar cards flex to fill viewport height */
+/* Sidebar cards fill viewport height */
 @media (min-width: 768px) {
   .dash-sidebar > .combined-card {
     flex: 1;
@@ -2141,24 +2132,7 @@ button {
 
   .dash-sidebar > .combined-card > * {
     min-height: 0;
-    overflow: auto;
-  }
-
-  /* Calendar combined card gets more space */
-  .dash-sidebar > .combined-card:first-child {
-    flex: 1.2;
-  }
-
-  /* Memo combined card gets less */
-  .dash-sidebar > .combined-card:last-of-type {
-    flex: 0.8;
-  }
-
-  /* Record detail takes minimal space */
-  .dash-sidebar > .record-detail {
-    flex-shrink: 0;
-    max-height: 200px;
-    overflow-y: auto;
+    flex: 1;
   }
 }
 
@@ -2452,6 +2426,7 @@ button {
   gap: 8px;
   padding: 8px 12px;
   flex-wrap: wrap;
+  flex-shrink: 0;
 }
 
 .btn-ai-trigger {
@@ -2488,4 +2463,98 @@ button {
   bottom: 12px;
   right: 12px;
   z-index: 5;
+}
+
+/* ===== Card Fullscreen + Expand Button ===== */
+.stat-card-wrap {
+  position: relative;
+  height: 100%;
+}
+
+.card-expand-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 10;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 16px;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  line-height: 1;
+}
+.card-expand-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+}
+
+.combined-card {
+  position: relative;
+}
+
+/* Fullscreen card */
+.card-fullscreen {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 900 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  max-width: none !important;
+  border-radius: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: var(--bg) !important;
+}
+
+.card-fullscreen .stat-card,
+.card-fullscreen .color-charts-card,
+.card-fullscreen .stat-card-wrap {
+  height: 100vh !important;
+  max-width: none !important;
+  border-radius: 0 !important;
+  border: none !important;
+}
+
+.card-fullscreen .chart-tab-content {
+  flex: 1;
+  min-height: 0;
+}
+
+.card-fullscreen .card-expand-btn {
+  top: 16px;
+  right: 16px;
+  z-index: 920;
+  background: rgba(255, 255, 255, 0.12);
+  width: 36px;
+  height: 36px;
+  font-size: 20px;
+}
+
+/* Hide other cards when one is fullscreen */
+.card-hidden {
+  display: none !important;
+}
+
+/* Fullscreen combined card for memo */
+.combined-card.card-fullscreen {
+  display: flex !important;
+  flex-direction: column;
+  padding: 24px !important;
+}
+.combined-card.card-fullscreen > * {
+  flex: 1;
+  min-height: 0;
+}
+.combined-card.card-fullscreen .card-expand-btn {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 920;
 }
