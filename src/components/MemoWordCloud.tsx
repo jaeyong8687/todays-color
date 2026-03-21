@@ -149,7 +149,7 @@ export default function MemoWordCloud({ records }: Props) {
     const updateSize = () => {
       const container = containerRef.current;
       if (container) {
-        const w = Math.min(container.clientWidth - 16, 600);
+        const w = container.clientWidth - 8;
         setSize({ w: Math.max(w, 240), h: Math.round(Math.max(w, 240) * 0.76) });
       }
     };

@@ -2063,6 +2063,15 @@ button {
     grid-row: 1 / -1;
     min-width: 0;
   }
+
+  /* Hero chart card stretches to match sidebar height */
+  .dash-charts {
+    align-self: stretch;
+  }
+
+  .dash-charts .color-charts-card {
+    height: 100%;
+  }
 }
 
 

@@ -10,13 +10,13 @@ interface Props {
 
 export default function ColorCharts({ records }: Props) {
   const { lang } = useI18n();
-  const [tab, setTab] = useState<'scatter' | 'radial'>('scatter');
+  const [tab, setTab] = useState<'scatter' | 'radial'>('radial');
 
   if (records.length === 0) return null;
 
   const tabs = [
-    { key: 'scatter' as const, label: lang === 'ko' ? '분포 차트' : 'Distribution' },
-    { key: 'radial' as const, label: lang === 'ko' ? '분포 맵' : 'Radial Map' },
+    { key: 'radial' as const, label: lang === 'ko' ? '컬러 휠' : 'Color Wheel' },
+    { key: 'scatter' as const, label: lang === 'ko' ? '빈도 차트' : 'Frequency' },
   ];
 
   return (
