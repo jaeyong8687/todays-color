@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useI18n } from '../i18n';
 
 interface Props {
@@ -27,14 +28,13 @@ export default function AIReportModal({
     return () => window.removeEventListener('keydown', handleKey);
   }, [onClose]);
 
-  // Auto-generate on open if no report yet
   useEffect(() => {
     if (!report && !loading && !error) {
       onGenerate();
     }
   }, []);
 
-  return (
+  const modal = (
     <div
       className="ai-modal-backdrop"
       ref={backdropRef}
@@ -82,4 +82,6 @@ export default function AIReportModal({
       </div>
     </div>
   );
+
+  return createPortal(modal, document.body);
 }

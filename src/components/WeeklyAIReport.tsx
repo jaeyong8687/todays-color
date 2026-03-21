@@ -4,6 +4,7 @@ import { callAI, hasApiKey } from '../utils/ai';
 import { getColorDisplayName } from '../utils/colors';
 import { useI18n } from '../i18n';
 import AIReportModal from './AIReportModal';
+import AISparkle from './AISparkle';
 
 interface Props {
   records: ColorRecord[];
@@ -64,18 +65,15 @@ Warm, friendly tone, concise English. Use emojis.`;
   };
 
   const btnText = lang === 'ko'
-    ? `📊 주간 리포트 (${weekRecords.length}일)`
-    : `📊 Weekly Report (${weekRecords.length}d)`;
+    ? `주간 리포트 (${weekRecords.length}일)`
+    : `Weekly Report (${weekRecords.length}d)`;
   const title = lang === 'ko' ? '주간 AI 리포트' : 'Weekly AI Report';
   const retryText = lang === 'ko' ? '다시 생성' : 'Generate again';
 
   return (
     <>
-      <button
-        className="btn-ai-trigger"
-        onClick={() => setShowModal(true)}
-      >
-        {btnText}
+      <button className="btn-ai-trigger" onClick={() => setShowModal(true)}>
+        <AISparkle />{btnText}
       </button>
 
       {showModal && (

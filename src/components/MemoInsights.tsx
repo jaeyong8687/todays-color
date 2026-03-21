@@ -4,6 +4,7 @@ import { callAI } from '../utils/ai';
 import { getColorDisplayName } from '../utils/colors';
 import { useI18n } from '../i18n';
 import AIReportModal from './AIReportModal';
+import AISparkle from './AISparkle';
 
 interface Props {
   records: ColorRecord[];
@@ -90,19 +91,16 @@ Important: Colors are reference only. Analyze ONLY memo text. Warm, empathetic t
   const title = lang === 'ko' ? '메모 감정 AI 분석' : 'Memo Emotion AI Analysis';
   const retryText = lang === 'ko' ? '다시 분석' : 'Analyze again';
   const btnLabel = lang === 'ko'
-    ? `💬 감정 분석 (${memoStats.withMemo}개)`
-    : `💬 Emotion (${memoStats.withMemo})`;
+    ? `감정 분석 (${memoStats.withMemo}개)`
+    : `Emotion (${memoStats.withMemo})`;
 
   if (!canRunEmotion) return null;
 
   return (
     <>
       <div className="ai-trigger-row">
-        <button
-          className="btn-ai-trigger"
-          onClick={() => setShowModal(true)}
-        >
-          {btnLabel}
+        <button className="btn-ai-trigger" onClick={() => setShowModal(true)}>
+          <AISparkle />{btnLabel}
         </button>
       </div>
 

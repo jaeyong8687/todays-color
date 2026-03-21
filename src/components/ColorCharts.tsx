@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import HueDotChart from './HueDotChart';
 import RadialHueMap from './RadialHueMap';
 import AIReportModal from './AIReportModal';
+import AISparkle from './AISparkle';
 import type { ColorRecord } from '../types';
 import { callAI, hasApiKey } from '../utils/ai';
 import { getColorDisplayName } from '../utils/colors';
@@ -103,12 +104,12 @@ Warm, friendly tone. Use emojis. Be concise.`;
     { key: 'scatter' as const, label: lang === 'ko' ? '빈도 차트' : 'Frequency' },
   ];
 
-  const aiLabel = lang === 'ko' ? '🎨 색상 분석' : '🎨 Color Analysis';
+  const aiLabel = lang === 'ko' ? '색상 분석' : 'Color Analysis';
   const title = lang === 'ko' ? '색상 패턴 AI 분석' : 'Color Pattern AI Analysis';
   const retryText = lang === 'ko' ? '다시 분석' : 'Analyze again';
 
   return (
-    <div className="stat-card color-charts-card">
+    <div className="stat-card color-charts-card" style={{ position: 'relative' }}>
       <div className="chart-tabs">
         {tabs.map((t) => (
           <button
@@ -119,19 +120,19 @@ Warm, friendly tone. Use emojis. Be concise.`;
             {t.label}
           </button>
         ))}
-        {canAnalyze && (
-          <button
-            className="chart-tab chart-tab-ai"
-            onClick={() => setShowAI(true)}
-          >
-            {aiLabel}
-          </button>
-        )}
       </div>
       <div className="chart-tab-content">
         {tab === 'scatter' && <HueDotChart records={records} />}
         {tab === 'radial' && <RadialHueMap records={records} />}
       </div>
+
+      {canAnalyze && (
+        <div className="chart-ai-btn-wrap">
+          <button className="btn-ai-trigger" onClick={() => setShowAI(true)}>
+            <AISparkle />{aiLabel}
+          </button>
+        </div>
+      )}
 
       {showAI && (
         <AIReportModal
