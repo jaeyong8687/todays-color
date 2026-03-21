@@ -391,9 +391,25 @@ button {
   animation: pageEnter 0.25s ease-out;
 }
 
+.page.analysis-dashboard {
+  align-items: stretch;
+}
+
 @media (min-width: 768px) {
   .page {
+    padding: 20px 24px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .page {
     padding: 24px 32px;
+  }
+}
+
+@media (min-width: 1440px) {
+  .page {
+    padding: 24px 40px;
   }
 }
 
@@ -1994,69 +2010,98 @@ button {
 .analysis-dashboard {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 16px;
   padding-bottom: 40px;
+}
+
+/* Override ALL max-width caps inside dashboard — cards must fill their grid cell */
+.analysis-dashboard .stat-card,
+.analysis-dashboard .weekly-review-card,
+.analysis-dashboard .weekly-review-section,
+.analysis-dashboard .calendar-large,
+.analysis-dashboard .record-detail,
+.analysis-dashboard .analysis-grid,
+.analysis-dashboard .analysis-grid .stat-card,
+.analysis-dashboard .chart-container {
+  max-width: 100%;
+  width: 100%;
 }
 
 .dash-section {
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
+  min-width: 0; /* prevent grid blowout */
+}
+/* Calendar section: side-by-side at tablet when full-width */
+@media (min-width: 768px) and (max-width: 1099px) {
+  .dash-calendar {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    align-items: start;
+  }
+  
+  .dash-calendar .record-detail {
+    grid-column: 1 / -1;
+  }
 }
 
-/* On desktop: 2-column grid for charts */
+
+/* Tablet: calendar full-width, then 2-col grid below */
 @media (min-width: 768px) {
   .analysis-dashboard {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    grid-template-rows: auto auto;
-    gap: 24px;
+    gap: 16px;
     align-items: start;
   }
 
   .dash-calendar {
-    grid-column: 1 / 2;
-    grid-row: 1 / 2;
+    grid-column: 1 / -1;
   }
 
   .dash-charts {
-    grid-column: 2 / 3;
-    grid-row: 1 / 2;
+    grid-column: 1 / 2;
+    min-width: 0;
+    overflow: hidden;
   }
 
   .dash-memos {
-    grid-column: 1 / -1;
-    grid-row: 2 / 3;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-  }
-
-  .dash-memos > :last-child {
-    grid-column: 1 / -1;
+    grid-column: 2 / 3;
+    min-width: 0;
   }
 }
 
-/* Large desktop: 3 columns */
-@media (min-width: 1200px) {
+/* Desktop: 3 columns, all in one row */
+@media (min-width: 1100px) {
   .analysis-dashboard {
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: minmax(340px, 1.1fr) 1fr 1fr;
+    gap: 20px;
   }
 
   .dash-calendar {
     grid-column: 1 / 2;
+    grid-row: 1 / 2;
   }
 
   .dash-charts {
     grid-column: 2 / 3;
+    grid-row: 1 / 2;
   }
 
   .dash-memos {
     grid-column: 3 / 4;
-    grid-row: 1 / 3;
-    display: flex;
-    flex-direction: column;
+    grid-row: 1 / 2;
+  }
+}
+
+/* Large desktop */
+@media (min-width: 1440px) {
+  .analysis-dashboard {
+    grid-template-columns: minmax(380px, 1fr) 1fr 1fr;
+    gap: 24px;
   }
 }
 

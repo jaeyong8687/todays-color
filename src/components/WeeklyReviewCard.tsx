@@ -91,9 +91,7 @@ export default function WeeklyReviewCard({ records, focusDate }: Props) {
   }, [focusDate, records, t]);
 
   return (
-    <section className="weekly-review-section">
-      <div className="weekly-review-heading">{t.weeklyReview}</div>
-      <div className="weekly-review-card">
+    <div className="weekly-review-card">
         <div className="weekly-review-title">{t.weeklyReviewCardTitle(summary.weekLabel)}</div>
 
         <div className="weekly-review-swatches">
@@ -117,7 +115,6 @@ export default function WeeklyReviewCard({ records, focusDate }: Props) {
             <p>{t.weeklyVividSummary(summary.mostVividDay.weekdayName)}</p>
           )}
         </div>
-      </div>
-    </section>
+    </div>
   );
 }
