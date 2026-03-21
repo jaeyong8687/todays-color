@@ -77,15 +77,20 @@ export default function CalendarPage() {
 
   return (
     <div className="page analysis-dashboard">
-      {/* Combined: Calendar + Weekly Review + Weekly AI Report */}
-      <section className="dash-section dash-calendar">
+      {/* LEFT: Color Charts — main visual, largest */}
+      <section className="dash-section dash-charts">
+        <ColorCharts records={records} />
+      </section>
+
+      {/* RIGHT: Tiles stacked vertically */}
+      <section className="dash-section dash-sidebar">
+        {/* Calendar tile */}
         <div className="combined-card">
           <CalendarComponent
             records={records}
             onSelectDate={handleSelectDate}
             selectedDate={selectedDate}
             onFutureDateClick={handleFutureDateClick}
-
           />
           <WeeklyAIReport records={records} />
         </div>
@@ -128,15 +133,8 @@ export default function CalendarPage() {
             onClose={() => setEditing(false)}
           />
         )}
-      </section>
 
-      {/* Charts — tabbed */}
-      <section className="dash-section dash-charts">
-        <ColorCharts records={records} />
-      </section>
-
-      {/* Combined: Word Cloud + Memo AI Analysis */}
-      <section className="dash-section dash-memos">
+        {/* Memo analysis tile */}
         <div className="combined-card">
           <MemoWordCloud records={records} />
           <MemoInsights records={records} />

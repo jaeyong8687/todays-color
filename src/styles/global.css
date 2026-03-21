@@ -2031,73 +2031,39 @@ button {
   gap: 12px;
   min-width: 0; /* prevent grid blowout */
 }
-/* Calendar section: side-by-side at tablet when full-width */
-@media (min-width: 768px) and (max-width: 1099px) {
-  .dash-calendar {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    align-items: start;
-  }
-  
-  .dash-calendar .record-detail {
-    grid-column: 1 / -1;
-  }
-}
-
-
-/* Tablet: calendar full-width, then 2-col grid below */
+/* Tablet+: Charts big left, sidebar tiles right */
 @media (min-width: 768px) {
   .analysis-dashboard {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 3fr 2fr;
     gap: 16px;
     align-items: start;
   }
 
-  .dash-calendar {
-    grid-column: 1 / -1;
-  }
-
   .dash-charts {
     grid-column: 1 / 2;
+    grid-row: 1 / 2;
     min-width: 0;
-    overflow: hidden;
   }
 
-  .dash-memos {
+  .dash-sidebar {
     grid-column: 2 / 3;
+    grid-row: 1 / 2;
     min-width: 0;
   }
 }
 
-/* Desktop: 3 columns, all in one row */
+/* Desktop: wider ratio */
 @media (min-width: 1100px) {
   .analysis-dashboard {
-    grid-template-columns: minmax(340px, 1.1fr) 1fr 1fr;
+    grid-template-columns: 1.6fr 1fr;
     gap: 20px;
-  }
-
-  .dash-calendar {
-    grid-column: 1 / 2;
-    grid-row: 1 / 2;
-  }
-
-  .dash-charts {
-    grid-column: 2 / 3;
-    grid-row: 1 / 2;
-  }
-
-  .dash-memos {
-    grid-column: 3 / 4;
-    grid-row: 1 / 2;
   }
 }
 
 /* Large desktop */
 @media (min-width: 1440px) {
   .analysis-dashboard {
-    grid-template-columns: minmax(380px, 1fr) 1fr 1fr;
     gap: 24px;
   }
 }
@@ -2180,6 +2146,31 @@ button {
 .color-charts-card {
   padding: 0;
   overflow: hidden;
+}
+
+@media (min-width: 768px) {
+  .dash-charts .color-charts-card {
+    min-height: 500px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .dash-charts .chart-tab-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .dash-charts .chart-tab-content > .stat-card {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .dash-charts .chart-container {
+    flex: 1;
+    min-height: 400px;
+  }
 }
 
 .chart-tabs {
