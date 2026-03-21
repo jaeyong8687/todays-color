@@ -88,20 +88,22 @@ export default function CalendarPage() {
 
   return (
     <div className="page analysis-dashboard">
-      {/* Calendar + Record Detail */}
+      {/* Combined: Calendar + Weekly Review + Weekly AI Report */}
       <section className="dash-section dash-calendar">
-        <CalendarComponent
-          records={records}
-          onSelectDate={handleSelectDate}
-          selectedDate={selectedDate}
-          onFutureDateClick={handleFutureDateClick}
-          onViewChange={(year, month) => {
-            setViewYear(year);
-            setViewMonth(month);
-          }}
-        />
-
-        <WeeklyReviewCard records={records} focusDate={weeklyFocusDate} />
+        <div className="combined-card">
+          <CalendarComponent
+            records={records}
+            onSelectDate={handleSelectDate}
+            selectedDate={selectedDate}
+            onFutureDateClick={handleFutureDateClick}
+            onViewChange={(year, month) => {
+              setViewYear(year);
+              setViewMonth(month);
+            }}
+          />
+          <WeeklyReviewCard records={records} focusDate={weeklyFocusDate} />
+          <WeeklyAIReport records={records} />
+        </div>
 
         {selectedDate && !editing && selectedRecord && (
           <div className="record-detail">
@@ -143,17 +145,18 @@ export default function CalendarPage() {
         )}
       </section>
 
-      {/* Color Charts */}
+      {/* Charts — stay separate */}
       <section className="dash-section dash-charts">
         <HueDotChart records={records} />
         <RadialHueMap records={records} />
       </section>
 
-      {/* Memo Analysis */}
+      {/* Combined: Word Cloud + Memo AI Analysis */}
       <section className="dash-section dash-memos">
-        <MemoWordCloud records={records} />
-        <MemoInsights records={records} />
-        <WeeklyAIReport records={records} />
+        <div className="combined-card">
+          <MemoWordCloud records={records} />
+          <MemoInsights records={records} />
+        </div>
       </section>
 
       {showFutureToast && (

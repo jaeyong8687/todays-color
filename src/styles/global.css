@@ -2130,3 +2130,49 @@ button {
   from { opacity: 0; }
   to { opacity: 1; }
 }
+
+/* ===== Combined Cards — nested components lose their own card chrome ===== */
+.combined-card {
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius);
+  padding: 16px;
+  box-shadow: var(--glass-shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.combined-card > .stat-card,
+.combined-card > .weekly-review-card,
+.combined-card > .calendar-large {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-radius: 0;
+  max-width: 100%;
+}
+
+.combined-card > .stat-card h3 {
+  display: none;
+}
+
+/* Subtle divider between sections inside combined card */
+.combined-card > :not(:first-child) {
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding-top: 12px;
+  margin-top: 8px;
+}
+
+/* Weekly review card inside combined — keep its special gradient bg as subtle */
+.combined-card > .weekly-review-card {
+  background: linear-gradient(180deg, rgba(124, 111, 247, 0.06), transparent);
+  border-radius: 12px;
+  padding: 14px;
+}
