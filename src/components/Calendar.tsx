@@ -93,6 +93,13 @@ export default function Calendar({ records, onSelectDate, selectedDate, onViewCh
           const isFuture = isFutureDate(dateStr);
           const isSelected = dateStr === selectedDate;
 
+          const cellStyle = record
+            ? {
+                backgroundColor: record.color.hsl,
+                color: record.color.lightness > 55 ? '#111' : '#fff',
+              }
+            : undefined;
+
           return (
             <div
               key={dateStr}
@@ -103,6 +110,7 @@ export default function Calendar({ records, onSelectDate, selectedDate, onViewCh
                 isFuture ? 'future' : '',
                 isSelected ? 'selected' : '',
               ].filter(Boolean).join(' ')}
+              style={cellStyle}
               onClick={() => {
                 if (isFuture) {
                   onFutureDateClick?.(dateStr);
@@ -112,13 +120,6 @@ export default function Calendar({ records, onSelectDate, selectedDate, onViewCh
               }}
             >
               <span className="calendar-day-num">{day}</span>
-              {record && (
-                <span
-                  className="calendar-day-dot"
-                  style={{ backgroundColor: record.color.hsl }}
-                  aria-hidden="true"
-                />
-              )}
             </div>
           );
         })}

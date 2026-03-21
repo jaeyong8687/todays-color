@@ -1,14 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import CalendarComponent from '../components/Calendar';
 import EditRecordModal from '../components/EditRecordModal';
-import WeeklyReviewCard from '../components/WeeklyReviewCard';
 import MemoWordCloud from '../components/MemoWordCloud';
 import MemoInsights from '../components/MemoInsights';
 import WeeklyAIReport from '../components/WeeklyAIReport';
-import HueDotChart from '../components/HueDotChart';
-import RadialHueMap from '../components/RadialHueMap';
+import ColorCharts from '../components/ColorCharts';
 import { useColorHistory } from '../hooks/useColorHistory';
-import { getTodayString, isFutureDate } from '../utils/storage';
+import { isFutureDate } from '../utils/storage';
 import { getColorDisplayName } from '../utils/colors';
 import { useI18n } from '../i18n';
 import type { ColorRecord } from '../types';
@@ -20,18 +18,9 @@ export default function CalendarPage() {
   const [editing, setEditing] = useState(false);
   const [showFutureToast, setShowFutureToast] = useState(false);
   const futureToastTimerRef = useRef<number | null>(null);
-  const today = new Date();
-  const [viewYear, setViewYear] = useState(today.getFullYear());
-  const [viewMonth, setViewMonth] = useState(today.getMonth() + 1);
 
   const selectedRecord = selectedDate ? getByDate(selectedDate) : null;
-  const currentMonthPrefix = `${viewYear}-${String(viewMonth).padStart(2, '0')}`;
-  const todayStr = getTodayString();
-  const weeklyFocusDate = selectedDate?.startsWith(currentMonthPrefix)
-    ? selectedDate
-    : todayStr.startsWith(currentMonthPrefix)
-      ? todayStr
-      : `${currentMonthPrefix}-01`;
+
 
   const formatDate = (dateStr: string) => {
     const [y, m, d] = dateStr.split('-');
@@ -96,12 +85,8 @@ export default function CalendarPage() {
             onSelectDate={handleSelectDate}
             selectedDate={selectedDate}
             onFutureDateClick={handleFutureDateClick}
-            onViewChange={(year, month) => {
-              setViewYear(year);
-              setViewMonth(month);
-            }}
+
           />
-          <WeeklyReviewCard records={records} focusDate={weeklyFocusDate} />
           <WeeklyAIReport records={records} />
         </div>
 
@@ -145,10 +130,9 @@ export default function CalendarPage() {
         )}
       </section>
 
-      {/* Charts — stay separate */}
+      {/* Charts — tabbed */}
       <section className="dash-section dash-charts">
-        <HueDotChart records={records} />
-        <RadialHueMap records={records} />
+        <ColorCharts records={records} />
       </section>
 
       {/* Combined: Word Cloud + Memo AI Analysis */}
