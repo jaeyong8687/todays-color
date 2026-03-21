@@ -127,7 +127,7 @@ export default function RadialHueMap({ records }: Props) {
     const updateSize = () => {
       const container = containerRef.current;
       if (container) {
-        const w = Math.min(container.clientWidth - 16, 600);
+        const w = Math.min(container.clientWidth - 16, 800);
         setSize(Math.max(w, 200));
       }
     };

@@ -141,7 +141,7 @@ export default function HueDotChart({ records }: Props) {
   return (
     <div className="stat-card">
       <h3>{t.colorDotChart || '색상 분포 차트'}</h3>
-      <div className="chart-container" style={{ height: 280 }}>
+      <div className="chart-container">
         <Scatter data={chartData} options={chartOptions as any} />
       </div>
     </div>
