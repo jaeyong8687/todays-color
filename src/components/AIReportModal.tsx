@@ -15,7 +15,7 @@ interface Props {
 
 export default function AIReportModal({
   title, report, loading, error,
-  onGenerate, onClose, generateLabel, retryLabel,
+  onGenerate, onClose, generateLabel: _generateLabel, retryLabel,
 }: Props) {
   const { t } = useI18n();
   const backdropRef = useRef<HTMLDivElement>(null);

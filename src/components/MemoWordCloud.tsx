@@ -227,7 +227,7 @@ export default function MemoWordCloud({ records }: Props) {
 
     if (found && found !== hoveredWord) {
       setHoveredWord(found);
-      const cRect = container.getBoundingClientRect();
+      const cRect = containerNode.getBoundingClientRect();
       setTooltipPos({
         x: e.clientX - cRect.left + 12,
         y: e.clientY - cRect.top - 30,
