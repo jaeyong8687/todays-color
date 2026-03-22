@@ -2130,7 +2130,12 @@ button {
     overflow: hidden;
   }
 
-  .dash-sidebar > .combined-card > * {
+  /* Only MemoWordCloud grows, trigger row stays compact */
+  .dash-sidebar > .combined-card > .ai-trigger-row {
+    flex: 0 0 auto;
+  }
+
+  .dash-sidebar > .combined-card > *:not(.ai-trigger-row):not(.card-expand-btn) {
     min-height: 0;
     flex: 1;
   }
