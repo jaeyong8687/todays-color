@@ -133,23 +133,14 @@ export default function RadialHueMap({ records }: Props) {
         const w = Math.round(entry.contentRect.width);
         const h = Math.round(entry.contentRect.height);
         if (w > 100 && h > 100) {
-          const s = Math.min(w, h, 900);
-          setSize((prev) => prev === Math.max(s, 200) ? prev : Math.max(s, 200));
+          const s = Math.max(Math.min(w, h, 900), 200);
+          setSize((prev) => prev === s ? prev : s);
         }
       }
     });
     observer.observe(container);
-
-    // Sync initial read
-    const rect = container.getBoundingClientRect();
-    const w = Math.round(rect.width);
-    const h = Math.round(rect.height - 24); // minus padding
-    if (w > 100 && h > 100) {
-      setSize(Math.max(Math.min(w, h, 900), 200));
-    }
-
     return () => observer.disconnect();
-  });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     const canvas = canvasRef.current;

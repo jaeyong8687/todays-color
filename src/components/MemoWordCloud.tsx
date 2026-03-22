@@ -1,4 +1,4 @@
-import { useRef, useEffect, useMemo, useState } from 'react';
+import { useRef, useEffect, useMemo, useState, useCallback } from 'react';
 import type { ColorRecord } from '../types';
 import { useI18n } from '../i18n';
 import { VIZ } from './vizTokens';
@@ -145,7 +145,10 @@ function layoutWords(
 
 export default function MemoWordCloud({ records }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const [containerNode, setContainerNode] = useState<HTMLDivElement | null>(null);
+  const containerRef = useCallback((node: HTMLDivElement | null) => {
+    setContainerNode(node);
+  }, []);
   const observerRef = useRef<ResizeObserver | null>(null);
   const [hoveredWord, setHoveredWord] = useState<WordEntry | null>(null);
   const [tooltipPos, setTooltipPos] = useState<{ x: number; y: number } | null>(null);
@@ -161,11 +164,7 @@ export default function MemoWordCloud({ records }: Props) {
   const [size, setSize] = useState({ w: 340, h: 260 });
 
   useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    // Clean up previous observer
-    if (observerRef.current) observerRef.current.disconnect();
+    if (!containerNode) return;
 
     const observer = new ResizeObserver((entries) => {
       const entry = entries[0];
@@ -178,18 +177,9 @@ export default function MemoWordCloud({ records }: Props) {
       }
     });
     observerRef.current = observer;
-    observer.observe(container);
-
-    // Also read initial size synchronously
-    const rect = container.getBoundingClientRect();
-    const w = Math.round(rect.width);
-    const h = Math.round(rect.height - 16); // minus padding
-    if (w > 100 && h > 100) {
-      setSize({ w, h });
-    }
-
+    observer.observe(containerNode);
     return () => observer.disconnect();
-  });
+  }, [containerNode]);
 
   // Memoize layout so hover doesn't re-randomize positions/colors
   const words = useMemo(
@@ -225,8 +215,7 @@ export default function MemoWordCloud({ records }: Props) {
 
   const handleMouseMove = (e: React.MouseEvent) => {
     const canvas = canvasRef.current;
-    const container = containerRef.current;
-    if (!canvas || !container) return;
+    if (!canvas || !containerNode) return;
 
     const rect = canvas.getBoundingClientRect();
     const mx = (e.clientX - rect.left) * (size.w / rect.width);
