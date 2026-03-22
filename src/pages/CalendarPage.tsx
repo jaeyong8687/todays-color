@@ -3,12 +3,11 @@ import MemoWordCloud from '../components/MemoWordCloud';
 import MemoInsights from '../components/MemoInsights';
 import WeeklyAIReport from '../components/WeeklyAIReport';
 import ColorCharts from '../components/ColorCharts';
+import ColorAnalysis from '../components/ColorAnalysis';
 import { useColorHistory } from '../hooks/useColorHistory';
-import { useI18n } from '../i18n';
 
 export default function CalendarPage() {
   const { records } = useColorHistory();
-  const { lang } = useI18n();
   const [fullscreenCard, setFullscreenCard] = useState<string | null>(null);
 
   const toggleFullscreen = (id: string) => {
@@ -19,22 +18,28 @@ export default function CalendarPage() {
     <div className="page analysis-dashboard">
       {/* LEFT: Color Charts */}
       <section className={`dash-section dash-charts ${fullscreenCard === 'charts' ? 'card-fullscreen' : ''} ${fullscreenCard && fullscreenCard !== 'charts' ? 'card-hidden' : ''}`}>
-        <div className="stat-card-wrap">
-          <button className="card-expand-btn" onClick={() => toggleFullscreen('charts')} title={fullscreenCard === 'charts' ? 'Exit' : 'Fullscreen'}>
+        <div className="dash-card-inner">
+          <button className="card-expand-btn" onClick={() => toggleFullscreen('charts')}>
             {fullscreenCard === 'charts' ? '⊖' : '⊕'}
           </button>
-          <ColorCharts records={records} />
+          <div className="dash-card-content">
+            <ColorCharts records={records} />
+          </div>
+          <div className="ai-trigger-row">
+            <ColorAnalysis records={records} />
+          </div>
         </div>
       </section>
 
-      {/* RIGHT: Analysis tiles */}
-      <section className={`dash-section dash-sidebar ${fullscreenCard && fullscreenCard !== 'memo' && fullscreenCard !== 'ai' ? 'card-hidden' : ''}`}>
-        {/* Memo Word Cloud + AI Analysis */}
-        <div className={`combined-card ${fullscreenCard === 'memo' ? 'card-fullscreen' : ''} ${fullscreenCard && fullscreenCard !== 'memo' ? 'card-hidden' : ''}`}>
-          <button className="card-expand-btn" onClick={() => toggleFullscreen('memo')} title={fullscreenCard === 'memo' ? 'Exit' : 'Fullscreen'}>
+      {/* RIGHT: Word Cloud + AI */}
+      <section className={`dash-section dash-sidebar ${fullscreenCard && fullscreenCard !== 'memo' ? 'card-hidden' : ''}`}>
+        <div className={`dash-card-inner ${fullscreenCard === 'memo' ? 'card-fullscreen' : ''}`}>
+          <button className="card-expand-btn" onClick={() => toggleFullscreen('memo')}>
             {fullscreenCard === 'memo' ? '⊖' : '⊕'}
           </button>
-          <MemoWordCloud records={records} />
+          <div className="dash-card-content">
+            <MemoWordCloud records={records} />
+          </div>
           <div className="ai-trigger-row">
             <MemoInsights records={records} />
             <WeeklyAIReport records={records} />

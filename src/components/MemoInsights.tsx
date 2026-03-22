@@ -98,23 +98,13 @@ Important: Colors are reference only. Analyze ONLY memo text. Warm, empathetic t
 
   return (
     <>
-      <div className="ai-trigger-row">
-        <button className="btn-ai-trigger" onClick={() => setShowModal(true)}>
-          <AISparkle />{btnLabel}
-        </button>
-      </div>
-
+      <button className="btn-ai-trigger" onClick={() => setShowModal(true)}>
+        <AISparkle />{btnLabel}
+      </button>
       {showModal && (
-        <AIReportModal
-          title={title}
-          report={report}
-          loading={loading}
-          error={error}
-          onGenerate={runEmotionAnalysis}
-          onClose={() => setShowModal(false)}
-          generateLabel={btnLabel}
-          retryLabel={retryText}
-        />
+        <AIReportModal title={title} report={report} loading={loading} error={error}
+          onGenerate={runEmotionAnalysis} onClose={() => setShowModal(false)}
+          generateLabel={btnLabel} retryLabel={retryText} />
       )}
     </>
   );

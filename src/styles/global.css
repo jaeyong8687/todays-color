@@ -2092,6 +2092,10 @@ button {
 
 
 
+  .dash-charts .dash-card-inner {
+    height: 100%;
+  }
+
   .dash-charts .color-charts-card {
     height: 100%;
     display: flex;
@@ -2120,25 +2124,54 @@ button {
   }
 }
 
-/* Sidebar cards fill viewport height */
+/* Sidebar fills viewport height */
 @media (min-width: 768px) {
-  .dash-sidebar > .combined-card {
-    flex: 1;
-    min-height: 0;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
-
-  /* Only MemoWordCloud grows, trigger row stays compact */
-  .dash-sidebar > .combined-card > .ai-trigger-row {
-    flex: 0 0 auto;
-  }
-
-  .dash-sidebar > .combined-card > *:not(.ai-trigger-row):not(.card-expand-btn) {
-    min-height: 0;
+  .dash-sidebar > .dash-card-inner {
     flex: 1;
   }
+}
+
+/* ===== Dash Card Inner — uniform layout for both columns ===== */
+.dash-card-inner {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.dash-card-content {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Charts card inside dash-card-content — remove its own card chrome */
+.dash-card-content > .color-charts-card {
+  background: none;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  height: 100%;
+}
+
+/* Word cloud inside dash-card-content */
+.dash-card-content > .stat-card {
+  background: none;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  flex: 1;
+  min-height: 0;
 }
 
 /* ===== Bridge Card Overlay ===== */
@@ -2429,9 +2462,10 @@ button {
 .ai-trigger-row {
   display: flex;
   gap: 8px;
-  padding: 8px 12px;
+  padding: 12px;
   flex-wrap: wrap;
   flex-shrink: 0;
+  align-items: center;
 }
 
 .btn-ai-trigger {
@@ -2465,19 +2499,10 @@ button {
   opacity: 0.9;
 }
 
-/* Color chart AI button — positioned inside chart card */
-.chart-ai-btn-wrap {
-  position: absolute;
-  bottom: 12px;
-  right: 12px;
-  z-index: 5;
-}
+
 
 /* ===== Card Fullscreen + Expand Button ===== */
-.stat-card-wrap {
-  position: relative;
-  height: 100%;
-}
+
 
 .card-expand-btn {
   position: absolute;
