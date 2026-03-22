@@ -126,12 +126,27 @@ function layoutWords(
       });
     }
   }
+  // Center the bounding box of all words within the canvas
+  if (placed.length > 0) {
+    const minX = Math.min(...placed.map(w => w.x));
+    const maxX = Math.max(...placed.map(w => w.x + w.width));
+    const minY = Math.min(...placed.map(w => w.y));
+    const maxY = Math.max(...placed.map(w => w.y + w.height));
+    const dx = (width - (minX + maxX)) / 2;
+    const dy = (height - (minY + maxY)) / 2;
+    for (const w of placed) {
+      w.x += dx;
+      w.y += dy;
+    }
+  }
+
   return placed;
 }
 
 export default function MemoWordCloud({ records }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const observerRef = useRef<ResizeObserver | null>(null);
   const [hoveredWord, setHoveredWord] = useState<WordEntry | null>(null);
   const [tooltipPos, setTooltipPos] = useState<{ x: number; y: number } | null>(null);
   const wordsRef = useRef<WordEntry[]>([]);
@@ -146,17 +161,35 @@ export default function MemoWordCloud({ records }: Props) {
   const [size, setSize] = useState({ w: 340, h: 260 });
 
   useEffect(() => {
-    const updateSize = () => {
-      const container = containerRef.current;
-      if (container) {
-        const w = container.clientWidth - 8;
-        setSize({ w: Math.max(w, 240), h: Math.round(Math.max(w, 240) * 0.76) });
+    const container = containerRef.current;
+    if (!container) return;
+
+    // Clean up previous observer
+    if (observerRef.current) observerRef.current.disconnect();
+
+    const observer = new ResizeObserver((entries) => {
+      const entry = entries[0];
+      if (entry) {
+        const w = Math.round(entry.contentRect.width);
+        const h = Math.round(entry.contentRect.height);
+        if (w > 100 && h > 100) {
+          setSize((prev) => (prev.w === w && prev.h === h) ? prev : { w, h });
+        }
       }
-    };
-    updateSize();
-    window.addEventListener('resize', updateSize);
-    return () => window.removeEventListener('resize', updateSize);
-  }, []);
+    });
+    observerRef.current = observer;
+    observer.observe(container);
+
+    // Also read initial size synchronously
+    const rect = container.getBoundingClientRect();
+    const w = Math.round(rect.width);
+    const h = Math.round(rect.height - 16); // minus padding
+    if (w > 100 && h > 100) {
+      setSize({ w, h });
+    }
+
+    return () => observer.disconnect();
+  });
 
   // Memoize layout so hover doesn't re-randomize positions/colors
   const words = useMemo(
@@ -235,7 +268,7 @@ export default function MemoWordCloud({ records }: Props) {
       <h3>{title}</h3>
       <div
         ref={containerRef}
-        style={{ position: 'relative', display: 'flex', justifyContent: 'center', padding: '8px 0' }}
+        className="wc-canvas-container" style={{ position: 'relative' }}
       >
         <canvas
           ref={canvasRef}

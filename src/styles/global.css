@@ -2159,7 +2159,10 @@ button {
   box-shadow: none;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
-  height: 100%;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Word cloud inside dash-card-content */
@@ -2172,6 +2175,23 @@ button {
   -webkit-backdrop-filter: none;
   flex: 1;
   min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Word cloud h3 stays compact */
+.dash-card-content > .stat-card > h3 {
+  flex: 0 0 auto;
+}
+
+/* Word cloud canvas container — fill remaining space, center canvas */
+.dash-card-content > .stat-card:not(.color-charts-card) > div {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  overflow: hidden;
 }
 
 /* ===== Bridge Card Overlay ===== */
@@ -2273,7 +2293,7 @@ button {
 .chart-tabs {
   display: flex;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  flex-shrink: 0;
+  flex: 0 0 auto;
 }
 
 .chart-tab {
@@ -2319,6 +2339,7 @@ button {
   border-radius: 0;
   max-width: 100%;
   flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
 }
@@ -2336,12 +2357,21 @@ button {
   margin-top: 8px;
 }
 
-/* Radial map container — flex-grow so canvas fills space */
+/* Radial map container — fill space, center canvas */
+.chart-tab-content > .stat-card {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
 .chart-tab-content > .stat-card > div {
   flex: 1;
   display: flex;
-  flex-direction: column;
+  align-items: center;
   justify-content: center;
+  min-height: 0;
+  overflow: hidden;
 }
 
 /* ===== Responsive chart sizing ===== */
@@ -2590,4 +2620,24 @@ button {
   top: 16px;
   right: 16px;
   z-index: 920;
+}
+
+/* Word cloud canvas container — fills stat-card, centers canvas */
+.wc-canvas-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Radial hue map canvas container — fills chart-tab-content, centers canvas */
+.radial-canvas-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  overflow: hidden;
 }

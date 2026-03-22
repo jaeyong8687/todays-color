@@ -124,19 +124,32 @@ export default function RadialHueMap({ records }: Props) {
   const [size, setSize] = useState(340);
 
   useEffect(() => {
-    const updateSize = () => {
-      const container = containerRef.current;
-      if (container) {
-        const w = container.clientWidth - 8;
-        const h = container.clientHeight || w;
-        const s = Math.min(w, h, 900);
-        setSize(Math.max(s, 200));
+    const container = containerRef.current;
+    if (!container) return;
+
+    const observer = new ResizeObserver((entries) => {
+      const entry = entries[0];
+      if (entry) {
+        const w = Math.round(entry.contentRect.width);
+        const h = Math.round(entry.contentRect.height);
+        if (w > 100 && h > 100) {
+          const s = Math.min(w, h, 900);
+          setSize((prev) => prev === Math.max(s, 200) ? prev : Math.max(s, 200));
+        }
       }
-    };
-    updateSize();
-    window.addEventListener('resize', updateSize);
-    return () => window.removeEventListener('resize', updateSize);
-  }, []);
+    });
+    observer.observe(container);
+
+    // Sync initial read
+    const rect = container.getBoundingClientRect();
+    const w = Math.round(rect.width);
+    const h = Math.round(rect.height - 24); // minus padding
+    if (w > 100 && h > 100) {
+      setSize(Math.max(Math.min(w, h, 900), 200));
+    }
+
+    return () => observer.disconnect();
+  });
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -191,7 +204,7 @@ export default function RadialHueMap({ records }: Props) {
       <h3>{t.colorRadialMap || '색상 분포 맵'}</h3>
       <div
         ref={containerRef}
-        style={{ position: 'relative', display: 'flex', justifyContent: 'center', padding: '12px 0' }}
+        className="radial-canvas-container" style={{ position: 'relative' }}
       >
         <canvas
           ref={canvasRef}
