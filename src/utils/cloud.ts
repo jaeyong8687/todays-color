@@ -39,17 +39,20 @@ export async function cloudGetRecords(kakaoUserId: string, profileId: string): P
 
 export async function cloudSaveRecord(kakaoUserId: string, profileId: string, record: ColorRecord): Promise<void> {
   if (!supabase) return;
+  const row: Record<string, unknown> = {
+    kakao_user_id: kakaoUserId,
+    profile_id: profileId,
+    date: record.date,
+    color: record.color,
+    memo: record.memo,
+    emotion: record.emotion,
+  };
+  const tags = normalizeTags(record.tags);
+  if (tags !== undefined) row.tags = tags;
+
   const { error } = await supabase
     .from('color_records')
-    .upsert({
-      kakao_user_id: kakaoUserId,
-      profile_id: profileId,
-      date: record.date,
-      color: record.color,
-      memo: record.memo,
-      emotion: record.emotion,
-      tags: normalizeTags(record.tags) ?? null,
-    }, { onConflict: 'kakao_user_id,profile_id,date' });
+    .upsert(row, { onConflict: 'kakao_user_id,profile_id,date' });
 
   if (error) console.error('[Supabase] saveRecord:', error);
 }
@@ -140,15 +143,19 @@ function rowToRecord(row: Record<string, unknown>): ColorRecord {
 export async function migrateLocalToCloud(kakaoUserId: string, profileId: string, records: ColorRecord[]): Promise<void> {
   if (!supabase || records.length === 0) return;
 
-  const rows = records.map((r) => ({
-    kakao_user_id: kakaoUserId,
-    profile_id: profileId,
-    date: r.date,
-    color: r.color,
-    memo: r.memo,
-    emotion: r.emotion,
-    tags: normalizeTags(r.tags) ?? null,
-  }));
+  const rows = records.map((r) => {
+    const row: Record<string, unknown> = {
+      kakao_user_id: kakaoUserId,
+      profile_id: profileId,
+      date: r.date,
+      color: r.color,
+      memo: r.memo,
+      emotion: r.emotion,
+    };
+    const tags = normalizeTags(r.tags);
+    if (tags !== undefined) row.tags = tags;
+    return row;
+  });
 
   const { error } = await supabase
     .from('color_records')
