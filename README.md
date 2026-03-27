@@ -1,73 +1,64 @@
-# React + TypeScript + Vite
+# 오늘의 색 (Today's Color)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A daily color discovery app built with React, TypeScript, and Vite. Explore a new color every day with rich color analysis and insights.
 
-Currently, two official plugins are available:
+**Live App:** https://todays-color.vercel.app
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 🚀 Deployment
 
-## React Compiler
+This project is automatically deployed to Vercel on every push to the main branch.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Deployment Status
+- **Production:** https://todays-color.vercel.app
+- **GitHub:** https://github.com/jaeyong8687/todays-color
+- **Node.js:** 24.x
+- **Framework:** Vite
 
-## Expanding the ESLint configuration
+### CI/CD
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+GitHub Actions automatically deploys to Vercel when you push to `main`. To set this up:
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+1. Add these secrets to your GitHub repository:
+   - `VERCEL_TOKEN` - Your Vercel API token
+   - `VERCEL_ORG_ID` - Your Vercel organization ID
+   - `VERCEL_PROJECT_ID` - The Vercel project ID (currently `prj_p3xVPdv0ZFVd1dwW2CdyElHKQMHj`)
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+2. Pushes to `main` will automatically deploy to production
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Tech Stack
+
+- **React** + **TypeScript** + **Vite**
+- **Supabase** for backend
+- **Vercel** for hosting
+
+## Development
+
+### Prerequisites
+- Node.js 24.x
+- npm or yarn
+
+### Getting Started
+
+```bash
+npm install
+npm run dev      # Start dev server
+npm run build    # Build for production
+npm run lint     # Run linter
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### Build Output
+- Production build size: ~435KB JS + ~34KB CSS
+- Optimized with Vite for fast loading
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Project Structure
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+- `src/` - React components and application code
+- `public/` - Static assets
+- `dist/` - Built production files (generated)
+- `.github/workflows/` - CI/CD workflows
+
+## Resources
+
+- [Vite Documentation](https://vitejs.dev)
+- [React Documentation](https://react.dev)
+- [Vercel Documentation](https://vercel.com/docs)
